@@ -3,7 +3,7 @@ import { Check, X, AlertCircle } from 'lucide-react';
 
 interface ToastProps {
   message: string;
-  type: 'success' | 'error' | 'info';
+  type: 'success' | 'error' | 'info' | 'warning';
   isVisible: boolean;
   onClose: () => void;
   duration?: number;

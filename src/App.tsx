@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { HexColorPicker } from 'react-colorful';
 import Slider from 'rc-slider';
 import 'rc-slider/assets/index.css';
@@ -17,33 +17,11 @@ import Canvas from '@/components/Canvas';
 import PropertiesPanel from '@/components/PropertiesPanel';
 import PreviewModal from '@/components/PreviewModal';
 import Toast from '@/components/Toast';
+import ConfirmDialog from '@/components/ConfirmDialog';
 import { generateHTMLString, copyToClipboard } from '@/utils/htmlGenerator';
-import { Eye, Copy, Check } from 'lucide-react';
-
-interface CanvasComponent {
-  id: string;
-  type: string;
-  position: { x: number; y: number };
-  props: {
-    text?: string;
-    color: string;
-    opacity: number;
-    fontSize?: number;
-    fontWeight?: string;
-    textAlign?: string;
-    src?: string;
-    alt?: string;
-    objectFit?: string;
-    borderRadius?: number;
-    height?: number;
-    width?: number;
-    url?: string;
-    padding?: number;
-    backgroundColor?: string;
-    textColor?: string;
-    [key: string]: string | number | undefined;
-  };
-}
+import { storage } from '@/utils/storage';
+import type { CanvasComponent } from '@/utils/storage';
+import { Eye, Copy, Check, RotateCcw } from 'lucide-react';
 
 function App() {
   const [selectedComponentId, setSelectedComponentId] = useState<string>('');
@@ -56,9 +34,10 @@ function App() {
   const [lightness, setLightness] = useState(50);
   const [opacity, setOpacity] = useState(100);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const [isResetDialogOpen, setIsResetDialogOpen] = useState(false);
   const [toast, setToast] = useState<{
     message: string;
-    type: 'success' | 'error' | 'info';
+    type: 'success' | 'error' | 'info' | 'warning';
     isVisible: boolean;
   }>({
     message: '',
@@ -66,9 +45,49 @@ function App() {
     isVisible: false,
   });
 
-  // Get the currently selected component
   const selectedComponent =
     canvasComponents.find((comp) => comp.id === selectedComponentId) || null;
+
+  // Load canvas components from localStorage on mount
+  useEffect(() => {
+    const savedCanvas = storage.loadCanvas();
+    if (savedCanvas) {
+      setCanvasComponents(savedCanvas);
+      setToast({
+        message: `Canvas loaded from previous session (${savedCanvas.length} components)`,
+        type: 'info',
+        isVisible: true,
+      });
+    }
+  }, []);
+
+  // Save canvas components to localStorage whenever they change
+  useEffect(() => {
+    const success = storage.saveCanvas(canvasComponents);
+    if (!success) {
+      setToast({
+        message: 'Failed to save canvas to localStorage',
+        type: 'error',
+        isVisible: true,
+      });
+    }
+  }, [canvasComponents]);
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Ctrl/Cmd + R for reset
+      if ((e.ctrlKey || e.metaKey) && e.key === 'r') {
+        e.preventDefault();
+        if (canvasComponents.length > 0) {
+          handleResetClick();
+        }
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [canvasComponents.length]);
 
   const handleColorChange = (newColor: string) => {
     setColor(newColor);
@@ -294,6 +313,29 @@ function App() {
     }
   };
 
+  const handleResetClick = () => {
+    setIsResetDialogOpen(true);
+  };
+
+  const handleResetConfirm = () => {
+    setCanvasComponents([]);
+    setSelectedComponentId('');
+    const success = storage.clearCanvas();
+    if (success) {
+      setToast({
+        message: 'Canvas reset successfully',
+        type: 'success',
+        isVisible: true,
+      });
+    } else {
+      setToast({
+        message: 'Canvas reset but failed to clear localStorage',
+        type: 'warning',
+        isVisible: true,
+      });
+    }
+  };
+
   const closeToast = () => {
     setToast((prev) => ({ ...prev, isVisible: false }));
   };
@@ -302,9 +344,21 @@ function App() {
     <div className='flex flex-col h-screen bg-slate-50 dark:bg-slate-900'>
       {/* Top Toolbar */}
       <div className='flex justify-between items-center p-4 border-b border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800'>
-        <h1 className='text-2xl font-bold text-slate-900 dark:text-slate-100'>
-          Aura Editor
-        </h1>
+        <div className='flex items-center gap-4'>
+          <h1 className='text-2xl font-bold text-slate-900 dark:text-slate-100'>
+            Aura Editor
+          </h1>
+          {storage.hasCanvas() && (
+            <div className='flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400'>
+              <div className='w-2 h-2 bg-green-500 rounded-full'></div>
+              <span>Auto-saved</span>
+              <span className='text-xs'>
+                ({canvasComponents.length} component
+                {canvasComponents.length !== 1 ? 's' : ''})
+              </span>
+            </div>
+          )}
+        </div>
         <div className='flex items-center gap-2'>
           <Button onClick={handlePreview} className='flex items-center gap-2'>
             <Eye className='h-4 w-4' /> Preview
@@ -316,6 +370,14 @@ function App() {
               <Copy className='h-4 w-4' />
             )}
             Copy HTML
+          </Button>
+          <Button
+            onClick={handleResetClick}
+            className='flex items-center gap-2'
+            variant='outline'
+            title='Reset canvas (Ctrl/Cmd + R)'
+          >
+            <RotateCcw className='h-4 w-4' /> Reset
           </Button>
         </div>
       </div>
@@ -358,6 +420,13 @@ function App() {
         type={toast.type}
         isVisible={toast.isVisible}
         onClose={closeToast}
+      />
+      <ConfirmDialog
+        isOpen={isResetDialogOpen}
+        onClose={() => setIsResetDialogOpen(false)}
+        onConfirm={handleResetConfirm}
+        title='Confirm Reset'
+        message='Are you sure you want to reset the canvas? This action cannot be undone.'
       />
     </div>
   );
