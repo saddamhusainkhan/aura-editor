@@ -23,7 +23,9 @@ interface CanvasComponent {
   };
 }
 
-export const generateHTMLString = (canvasComponents: CanvasComponent[]): string => {
+export const generateHTMLString = (
+  canvasComponents: CanvasComponent[]
+): string => {
   if (canvasComponents.length === 0) {
     return `<!DOCTYPE html>
 <html lang="en">
@@ -53,6 +55,31 @@ export const generateHTMLString = (canvasComponents: CanvasComponent[]): string 
             text-align: center;
             color: #666;
         }
+        @media (max-width: 1024px) {
+            body {
+                padding: 15px;
+            }
+            .canvas-container {
+                width: 100%;
+                max-width: 768px;
+                height: 550px;
+            }
+        }
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            .canvas-container {
+                width: 100%;
+                max-width: 375px;
+                height: 500px;
+            }
+        }
+        @media (max-width: 480px) {
+            .canvas-container {
+                height: 400px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -73,20 +100,40 @@ export const generateHTMLString = (canvasComponents: CanvasComponent[]): string 
 
     switch (component.type) {
       case 'text':
-        return `<div style="${baseStyles} font-size: ${component.props.fontSize || 16}px; font-weight: ${component.props.fontWeight || 'normal'}; color: ${component.props.color};">
+        return `<div style="${baseStyles} font-size: ${
+          component.props.fontSize || 16
+        }px; font-weight: ${component.props.fontWeight || 'normal'}; color: ${
+          component.props.color
+        };">
             ${component.props.text || 'Default Text'}
         </div>`;
 
       case 'textarea':
-        return `<textarea style="${baseStyles} font-size: ${component.props.fontSize || 14}px; color: ${component.props.color}; text-align: ${component.props.textAlign || 'left'}; border: 1px solid #ccc; padding: 8px; resize: none; background: white;" readonly>
+        return `<textarea style="${baseStyles} font-size: ${
+          component.props.fontSize || 14
+        }px; color: ${component.props.color}; text-align: ${
+          component.props.textAlign || 'left'
+        }; border: 1px solid #ccc; padding: 8px; resize: none; background: white;" readonly>
             ${component.props.text || ''}
         </textarea>`;
 
       case 'image':
         if (component.props.src) {
-          return `<img src="${component.props.src}" alt="${component.props.alt || 'Image'}" style="${baseStyles} width: ${component.props.width || 120}px; height: ${component.props.height || 120}px; border-radius: ${component.props.borderRadius || 0}px; object-fit: ${component.props.objectFit || 'cover'}; border: 1px solid #ccc;" />`;
+          return `<img src="${component.props.src}" alt="${
+            component.props.alt || 'Image'
+          }" style="${baseStyles} width: ${
+            component.props.width || 120
+          }px; height: ${component.props.height || 120}px; border-radius: ${
+            component.props.borderRadius || 0
+          }px; object-fit: ${
+            component.props.objectFit || 'cover'
+          }; border: 1px solid #ccc;" />`;
         } else {
-          return `<div style="${baseStyles} width: ${component.props.width || 120}px; height: ${component.props.height || 120}px; border-radius: ${component.props.borderRadius || 0}px; background: #f1f5f9; border: 1px solid #cbd5e1; display: flex; align-items: center; justify-content: center; font-size: 24px;">
+          return `<div style="${baseStyles} width: ${
+            component.props.width || 120
+          }px; height: ${component.props.height || 120}px; border-radius: ${
+            component.props.borderRadius || 0
+          }px; background: #f1f5f9; border: 1px solid #cbd5e1; display: flex; align-items: center; justify-content: center; font-size: 24px;">
             🖼️
         </div>`;
         }
@@ -105,7 +152,9 @@ export const generateHTMLString = (canvasComponents: CanvasComponent[]): string 
             transition: opacity 0.2s;
         `;
 
-        const buttonContent = `<button style="${buttonStyles}">${component.props.text || 'Button'}</button>`;
+        const buttonContent = `<button style="${buttonStyles}">${
+          component.props.text || 'Button'
+        }</button>`;
 
         if (component.props.url) {
           return `<a href="${component.props.url}" target="_blank" rel="noopener noreferrer">${buttonContent}</a>`;
@@ -120,7 +169,9 @@ export const generateHTMLString = (canvasComponents: CanvasComponent[]): string 
     }
   };
 
-  const componentsHTML = canvasComponents.map(generateComponentHTML).join('\n        ');
+  const componentsHTML = canvasComponents
+    .map(generateComponentHTML)
+    .join('\n        ');
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -144,6 +195,31 @@ export const generateHTMLString = (canvasComponents: CanvasComponent[]): string 
             border: 1px solid #e2e8f0;
             border-radius: 8px;
             overflow: hidden;
+        }
+        @media (max-width: 1024px) {
+            body {
+                padding: 15px;
+            }
+            .canvas-container {
+                width: 100%;
+                max-width: 768px;
+                height: 550px;
+            }
+        }
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            .canvas-container {
+                width: 100%;
+                max-width: 375px;
+                height: 500px;
+            }
+        }
+        @media (max-width: 480px) {
+            .canvas-container {
+                height: 400px;
+            }
         }
     </style>
 </head>
@@ -178,4 +254,4 @@ export const copyToClipboard = async (text: string): Promise<boolean> => {
     console.error('Failed to copy to clipboard:', error);
     return false;
   }
-}; 
+};

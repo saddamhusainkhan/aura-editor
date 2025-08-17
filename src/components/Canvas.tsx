@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { X } from 'lucide-react';
 import TextComponent from './TextComponent';
 import TextAreaComponent from './TextAreaComponent';
 import ImageComponent from './ImageComponent';
@@ -42,6 +43,7 @@ interface CanvasProps {
     componentId: string,
     updates: Partial<CanvasComponent['props']>
   ) => void;
+  onComponentDelete?: (componentId: string) => void;
 }
 
 const Canvas: React.FC<CanvasProps> = ({
@@ -51,6 +53,7 @@ const Canvas: React.FC<CanvasProps> = ({
   onComponentSelect,
   onComponentMove,
   onComponentUpdate,
+  onComponentDelete,
 }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
@@ -62,7 +65,9 @@ const Canvas: React.FC<CanvasProps> = ({
 
     // Only allow dragging if component is selected
     if (selectedComponent?.id !== componentId) {
-      onComponentSelect && onComponentSelect(componentId);
+      if (onComponentSelect) {
+        onComponentSelect(componentId);
+      }
       return;
     }
 
@@ -117,6 +122,19 @@ const Canvas: React.FC<CanvasProps> = ({
     }
   }, [isDragging, selectedComponent, dragOffset]);
 
+  // Handle keyboard events for delete functionality
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Delete' && selectedComponent && onComponentDelete) {
+        e.preventDefault();
+        onComponentDelete(selectedComponent.id);
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [selectedComponent, onComponentDelete]);
+
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
     e.dataTransfer.dropEffect = 'copy';
@@ -154,98 +172,133 @@ const Canvas: React.FC<CanvasProps> = ({
       handleMouseDown(e, componentId);
     };
 
-    switch (component.type) {
-      case 'text':
-        return (
-          <TextComponent
-            key={component.id}
-            id={component.id}
-            position={component.position}
-            customProps={component.props}
-            isSelected={isSelected}
-            isDragging={isDragging && isSelected}
-            onSelect={handleComponentSelect}
-            onMouseDown={handleComponentMouseDown}
-            onTextChange={(componentId, newText) => {
-              if (onComponentUpdate) {
-                onComponentUpdate(componentId, { text: newText });
-              }
-            }}
-          />
-        );
+    const handleDeleteClick = (e: React.MouseEvent, componentId: string) => {
+      e.stopPropagation();
+      if (onComponentDelete) {
+        onComponentDelete(componentId);
+      }
+    };
 
-      case 'textarea':
-        return (
-          <TextAreaComponent
-            key={component.id}
-            id={component.id}
-            position={component.position}
-            customProps={component.props}
-            isSelected={isSelected}
-            isDragging={isDragging && isSelected}
-            onSelect={handleComponentSelect}
-            onMouseDown={handleComponentMouseDown}
-            onTextChange={(componentId, newText) => {
-              if (onComponentUpdate) {
-                onComponentUpdate(componentId, { text: newText });
-              }
-            }}
-          />
-        );
+    const componentContent = (() => {
+      switch (component.type) {
+        case 'text':
+          return (
+            <TextComponent
+              key={component.id}
+              id={component.id}
+              position={component.position}
+              customProps={component.props}
+              isSelected={isSelected}
+              isDragging={isDragging && isSelected}
+              onSelect={handleComponentSelect}
+              onMouseDown={handleComponentMouseDown}
+              onTextChange={(componentId, newText) => {
+                if (onComponentUpdate) {
+                  onComponentUpdate(componentId, { text: newText });
+                }
+              }}
+              onDelete={onComponentDelete}
+            />
+          );
 
-      case 'image':
-        return (
-          <ImageComponent
-            key={component.id}
-            id={component.id}
-            position={component.position}
-            customProps={component.props}
-            isSelected={isSelected}
-            isDragging={isDragging && isSelected}
-            onSelect={handleComponentSelect}
-            onMouseDown={handleComponentMouseDown}
-          />
-        );
+        case 'textarea':
+          return (
+            <TextAreaComponent
+              key={component.id}
+              id={component.id}
+              position={component.position}
+              customProps={component.props}
+              isSelected={isSelected}
+              isDragging={isDragging && isSelected}
+              onSelect={handleComponentSelect}
+              onMouseDown={handleComponentMouseDown}
+              onTextChange={(componentId, newText) => {
+                if (onComponentUpdate) {
+                  onComponentUpdate(componentId, { text: newText });
+                }
+              }}
+              onDelete={onComponentDelete}
+            />
+          );
 
-      case 'button':
-        return (
-          <ButtonComponent
-            key={component.id}
-            id={component.id}
-            position={component.position}
-            customProps={component.props}
-            isSelected={isSelected}
-            isDragging={isDragging && isSelected}
-            onSelect={handleComponentSelect}
-            onMouseDown={handleComponentMouseDown}
-          />
-        );
+        case 'image':
+          return (
+            <ImageComponent
+              key={component.id}
+              id={component.id}
+              position={component.position}
+              customProps={component.props}
+              isSelected={isSelected}
+              isDragging={isDragging && isSelected}
+              onSelect={handleComponentSelect}
+              onMouseDown={handleComponentMouseDown}
+            />
+          );
 
-      default:
-        return (
-          <div
-            key={component.id}
-            className={`absolute cursor-pointer select-none transition-all ${
-              isSelected
-                ? 'ring-2 ring-blue-500 ring-offset-2'
-                : 'hover:ring-1 hover:ring-slate-300 dark:hover:ring-slate-600'
-            } ${
-              isDragging && isSelected ? 'cursor-grabbing' : 'cursor-grab'
-            } px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded shadow-sm`}
-            style={{
-              left: component.position.x,
-              top: component.position.y,
-              opacity: component.props.opacity / 100,
-            }}
-            onMouseDown={(e) => handleMouseDown(e, component.id)}
-            onClick={(e) => handleComponentClick(e, component.id)}
-          >
-            <span className='text-sm text-slate-600 dark:text-slate-400'>
-              {component.type}
-            </span>
-          </div>
-        );
-    }
+        case 'button':
+          return (
+            <ButtonComponent
+              key={component.id}
+              id={component.id}
+              position={component.position}
+              customProps={component.props}
+              isSelected={isSelected}
+              isDragging={isDragging && isSelected}
+              onSelect={handleComponentSelect}
+              onMouseDown={handleComponentMouseDown}
+            />
+          );
+
+        default:
+          return (
+            <div
+              key={component.id}
+              className={`absolute cursor-pointer select-none transition-all ${
+                isSelected
+                  ? 'ring-2 ring-blue-500 ring-offset-2'
+                  : 'hover:ring-1 hover:ring-slate-300 dark:hover:ring-slate-600'
+              } ${
+                isDragging && isSelected ? 'cursor-grabbing' : 'cursor-grab'
+              } px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded shadow-sm`}
+              style={{
+                left: component.position.x,
+                top: component.position.y,
+                opacity: component.props.opacity / 100,
+              }}
+              onMouseDown={(e) => handleMouseDown(e, component.id)}
+              onClick={(e) => handleComponentClick(e, component.id)}
+            >
+              <span className='text-sm text-slate-600 dark:text-slate-400'>
+                {component.type}
+              </span>
+            </div>
+          );
+      }
+    })();
+
+    return (
+      <div key={component.id} className='relative'>
+        {componentContent}
+
+        {/* Delete Button - positioned at top-right of component */}
+        <button
+          onClick={(e) => handleDeleteClick(e, component.id)}
+          className={`absolute z-10 w-6 h-6 cursor-pointer ${
+            component.type === 'button' ? '-ml-2 -mt-1' : 'ml-8 -mt-1'
+          } bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center shadow-lg transition-all duration-200 ${
+            isSelected ? 'opacity-100' : 'opacity-0 hover:opacity-100'
+          }`}
+          style={{
+            position: 'absolute',
+            top: component.position.y - 8,
+            left: component.position.x + 100 - 8,
+          }}
+          title='Delete component (or press Delete key)'
+        >
+          <X className='w-3 h-3' />
+        </button>
+      </div>
+    );
   };
 
   return (

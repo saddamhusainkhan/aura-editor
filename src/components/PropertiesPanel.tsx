@@ -800,34 +800,6 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
             </CardContent>
           </Card>
 
-          {/* Action Buttons */}
-          <div className='space-y-2'>
-            <Button
-              variant='outline'
-              size='sm'
-              className='w-full'
-              onClick={() => handleColorChange('#3b82f6')}
-            >
-              Reset to Blue
-            </Button>
-            <Button
-              variant='outline'
-              size='sm'
-              className='w-full'
-              onClick={() => handleColorChange('#ef4444')}
-            >
-              Reset to Red
-            </Button>
-            <Button
-              variant='outline'
-              size='sm'
-              className='w-full'
-              onClick={() => handleColorChange('#10b981')}
-            >
-              Reset to Green
-            </Button>
-          </div>
-
           {/* Image Border Radius */}
           {selectedComponent.type === 'image' && (
             <Card className='shadow-sm'>

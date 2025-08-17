@@ -229,6 +229,18 @@ function App() {
     );
   };
 
+  const handleComponentDelete = (componentId: string) => {
+    updateCanvasWithHistory(
+      canvasComponents.filter((comp) => comp.id !== componentId),
+      'Component deleted'
+    );
+
+    // Clear selection if the deleted component was selected
+    if (selectedComponentId === componentId) {
+      setSelectedComponentId('');
+    }
+  };
+
   const handlePreview = () => {
     setIsPreviewOpen(true);
   };
@@ -399,6 +411,7 @@ function App() {
             onComponentSelect={handleComponentSelect}
             onComponentMove={handleComponentMove}
             onComponentUpdate={handleComponentUpdate}
+            onComponentDelete={handleComponentDelete}
           />
         </div>
 

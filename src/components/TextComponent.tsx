@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { Bold, Italic, Underline, X } from 'lucide-react';
 
 interface TextComponentProps {
   id: string;
@@ -16,6 +17,7 @@ interface TextComponentProps {
   onSelect: (componentId: string) => void;
   onMouseDown: (e: React.MouseEvent, componentId: string) => void;
   onTextChange?: (componentId: string, newText: string) => void;
+  onDelete?: (componentId: string) => void;
 }
 
 const TextComponent: React.FC<TextComponentProps> = ({
@@ -27,6 +29,7 @@ const TextComponent: React.FC<TextComponentProps> = ({
   onSelect,
   onMouseDown,
   onTextChange,
+  onDelete,
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editText, setEditText] = useState(customProps.text || 'Default Text');
@@ -168,28 +171,31 @@ const TextComponent: React.FC<TextComponentProps> = ({
             className='p-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100 transition-colors'
             title='Bold (Ctrl+B)'
           >
-            <svg className='w-4 h-4' fill='currentColor' viewBox='0 0 20 20'>
-              <path d='M12.6 11.8c1.1-1.1 1.8-2.6 1.8-4.2 0-3.3-2.7-6-6-6H4v16h6.4c1.8 0 3.4-.7 4.6-1.8 1.2-1.1 1.9-2.6 1.9-4.2 0-1.6-.7-3.1-1.8-4.2h-2.5zM6 4h4.4c1.1 0 2 .9 2 2s-.9 2-2 2H6V4zm6.4 12H6v-4h6.4c1.1 0 2 .9 2 2s-.9 2-2 2z' />
-            </svg>
+            <Bold className='h-4 w-4' />
           </button>
           <button
             onClick={() => handleFormatClick('italic')}
             className='p-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100 transition-colors'
             title='Italic (Ctrl+I)'
           >
-            <svg className='w-4 h-4' fill='currentColor' viewBox='0 0 20 20'>
-              <path d='M8 3a1 1 0 011-1h6a1 1 0 011 1v2a1 1 0 01-1 1H9a1 1 0 00-1 1v8a1 1 0 001 1h6a1 1 0 011 1v2a1 1 0 01-1 1H9a1 1 0 01-1-1v-2a1 1 0 00-1-1H7a1 1 0 01-1-1V6a1 1 0 011-1h1V3z' />
-            </svg>
+            <Italic className='h-4 w-4' />
           </button>
           <button
             onClick={() => handleFormatClick('underline')}
             className='p-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100 transition-colors'
             title='Underline (Ctrl+U)'
           >
-            <svg className='w-4 h-4' fill='currentColor' viewBox='0 0 20 20'>
-              <path d='M3 4a1 1 0 011-1h12a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 00-1 1v2a1 1 0 001 1h12a1 1 0 001-1v-2a1 1 0 00-1-1H4a1 1 0 01-1-1V4z' />
-            </svg>
+            <Underline className='h-4 w-4' />
           </button>
+          {onDelete && (
+            <button
+              onClick={() => onDelete(id)}
+              className='p-1.5 rounded hover:bg-red-100 dark:hover:bg-red-700 text-red-700 dark:text-red-300 hover:text-red-900 dark:hover:text-red-100 transition-colors'
+              title='Delete'
+            >
+              <X className='h-4 w-4' />
+            </button>
+          )}
         </div>
       )}
     </>
