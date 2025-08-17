@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { HexColorPicker } from 'react-colorful';
 import Slider from 'rc-slider';
 import 'rc-slider/assets/index.css';
@@ -18,10 +18,12 @@ import PropertiesPanel from '@/components/PropertiesPanel';
 import PreviewModal from '@/components/PreviewModal';
 import Toast from '@/components/Toast';
 import ConfirmDialog from '@/components/ConfirmDialog';
+import HistoryInfo from '@/components/HistoryInfo';
 import { generateHTMLString, copyToClipboard } from '@/utils/htmlGenerator';
 import { storage } from '@/utils/storage';
 import type { CanvasComponent } from '@/utils/storage';
-import { Eye, Copy, Check, RotateCcw } from 'lucide-react';
+import { HistoryManager } from '@/utils/history';
+import { Eye, Copy, Check, RotateCcw, Undo2, Redo2 } from 'lucide-react';
 
 function App() {
   const [selectedComponentId, setSelectedComponentId] = useState<string>('');
@@ -45,6 +47,7 @@ function App() {
     isVisible: false,
   });
 
+  const historyManager = useRef(new HistoryManager());
   const selectedComponent =
     canvasComponents.find((comp) => comp.id === selectedComponentId) || null;
 
@@ -53,6 +56,8 @@ function App() {
     const savedCanvas = storage.loadCanvas();
     if (savedCanvas) {
       setCanvasComponents(savedCanvas);
+      // Initialize history with loaded state
+      historyManager.current.push(savedCanvas, 'Session loaded');
       setToast({
         message: `Canvas loaded from previous session (${savedCanvas.length} components)`,
         type: 'info',
@@ -83,22 +88,47 @@ function App() {
           handleResetClick();
         }
       }
+
+      // Ctrl/Cmd + Z for undo
+      if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) {
+        e.preventDefault();
+        handleUndo();
+      }
+
+      // Ctrl/Cmd + Shift + Z or Ctrl/Cmd + Y for redo
+      if (
+        (e.ctrlKey || e.metaKey) &&
+        ((e.shiftKey && e.key === 'z') || e.key === 'y')
+      ) {
+        e.preventDefault();
+        handleRedo();
+      }
     };
 
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [canvasComponents.length]);
 
+  // Helper function to update canvas with history tracking
+  const updateCanvasWithHistory = (
+    newComponents: CanvasComponent[],
+    action: string
+  ) => {
+    setCanvasComponents(newComponents);
+    historyManager.current.push(newComponents, action);
+  };
+
   const handleColorChange = (newColor: string) => {
     setColor(newColor);
     if (selectedComponentId) {
       // Update the selected component's color on canvas
-      setCanvasComponents((prev) =>
-        prev.map((comp) =>
+      updateCanvasWithHistory(
+        canvasComponents.map((comp) =>
           comp.id === selectedComponentId
             ? { ...comp, props: { ...comp.props, color: newColor } }
             : comp
-        )
+        ),
+        'Color changed'
       );
     }
   };
@@ -123,12 +153,13 @@ function App() {
     setOpacity(opacityValue);
     if (selectedComponentId) {
       // Update the selected component's opacity on canvas
-      setCanvasComponents((prev) =>
-        prev.map((comp) =>
+      updateCanvasWithHistory(
+        canvasComponents.map((comp) =>
           comp.id === selectedComponentId
             ? { ...comp, props: { ...comp.props, opacity: opacityValue } }
             : comp
-        )
+        ),
+        'Opacity changed'
       );
     }
   };
@@ -178,7 +209,10 @@ function App() {
       },
     };
 
-    setCanvasComponents((prev) => [...prev, newComponent]);
+    updateCanvasWithHistory(
+      [...canvasComponents, newComponent],
+      'Component added'
+    );
     setSelectedComponentId(newComponent.id);
   };
 
@@ -226,17 +260,17 @@ function App() {
       },
     };
 
-    setCanvasComponents((prev) => [...prev, newComponent]);
+    updateCanvasWithHistory(
+      [...canvasComponents, newComponent],
+      'Component added'
+    );
     setSelectedComponentId(newComponent.id);
   };
 
   const handleComponentSelect = (componentId: string) => {
     setSelectedComponentId(componentId);
-
     if (componentId && componentId !== '') {
-      const component = canvasComponents.find(
-        (comp) => comp.id === componentId
-      );
+      const component = canvasComponents.find((comp) => comp.id === componentId);
       if (component) {
         setColor(component.props.color);
         setOpacity(component.props.opacity);
@@ -248,10 +282,11 @@ function App() {
     componentId: string,
     newPosition: { x: number; y: number }
   ) => {
-    setCanvasComponents((prev) =>
-      prev.map((comp) =>
+    updateCanvasWithHistory(
+      canvasComponents.map((comp) =>
         comp.id === componentId ? { ...comp, position: newPosition } : comp
-      )
+      ),
+      'Component moved'
     );
   };
 
@@ -259,15 +294,16 @@ function App() {
     componentId: string,
     updates: Partial<CanvasComponent['props']>
   ) => {
-    setCanvasComponents((prev) =>
-      prev.map((comp) =>
+    updateCanvasWithHistory(
+      canvasComponents.map((comp) =>
         comp.id === componentId
           ? { ...comp, props: { ...comp.props, ...updates } }
           : comp
-      )
+      ),
+      'Component updated'
     );
 
-    // Update local state if it's the selected component
+    // Also update local state for color and opacity if the updated component is selected
     if (componentId === selectedComponentId) {
       if (updates.color !== undefined) {
         setColor(updates.color);
@@ -280,12 +316,13 @@ function App() {
 
   const handleTextChange = (newText: string) => {
     if (selectedComponentId) {
-      setCanvasComponents((prev) =>
-        prev.map((comp) =>
+      updateCanvasWithHistory(
+        canvasComponents.map((comp) =>
           comp.id === selectedComponentId
             ? { ...comp, props: { ...comp.props, text: newText } }
             : comp
-        )
+        ),
+        'Text changed'
       );
     }
   };
@@ -313,6 +350,34 @@ function App() {
     }
   };
 
+  const handleUndo = () => {
+    const previousState = historyManager.current.undo();
+    if (previousState !== null) {
+      setCanvasComponents(previousState);
+      setToast({
+        message: `Undone: ${
+          historyManager.current.getLastAction() || 'Previous action'
+        }`,
+        type: 'info',
+        isVisible: true,
+      });
+    }
+  };
+
+  const handleRedo = () => {
+    const nextState = historyManager.current.redo();
+    if (nextState !== null) {
+      setCanvasComponents(nextState);
+      setToast({
+        message: `Redone: ${
+          historyManager.current.getLastAction() || 'Next action'
+        }`,
+        type: 'info',
+        isVisible: true,
+      });
+    }
+  };
+
   const handleResetClick = () => {
     setIsResetDialogOpen(true);
   };
@@ -321,6 +386,7 @@ function App() {
     setCanvasComponents([]);
     setSelectedComponentId('');
     const success = storage.clearCanvas();
+    historyManager.current.clear();
     if (success) {
       setToast({
         message: 'Canvas reset successfully',
@@ -358,6 +424,20 @@ function App() {
               </span>
             </div>
           )}
+          <div className='flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400'>
+            <div className='w-2 h-2 bg-blue-500 rounded-full'></div>
+            <span>History</span>
+            <span className='text-xs'>
+              ({historyManager.current.getHistorySize()}/{historyManager.current.getStats().maxSize})
+            </span>
+            <HistoryInfo
+              historySize={historyManager.current.getHistorySize()}
+              maxSize={historyManager.current.getStats().maxSize}
+              canUndo={historyManager.current.canUndo()}
+              canRedo={historyManager.current.canRedo()}
+              lastAction={historyManager.current.getLastAction()}
+            />
+          </div>
         </div>
         <div className='flex items-center gap-2'>
           <Button onClick={handlePreview} className='flex items-center gap-2'>
@@ -370,6 +450,24 @@ function App() {
               <Copy className='h-4 w-4' />
             )}
             Copy HTML
+          </Button>
+          <Button
+            onClick={handleUndo}
+            className='flex items-center gap-2'
+            variant='outline'
+            title='Undo (Ctrl/Cmd + Z)'
+            disabled={!historyManager.current.canUndo()}
+          >
+            <Undo2 className='h-4 w-4' /> Undo
+          </Button>
+          <Button
+            onClick={handleRedo}
+            className='flex items-center gap-2'
+            variant='outline'
+            title='Redo (Ctrl/Cmd + Shift + Z or Ctrl/Cmd + Y)'
+            disabled={!historyManager.current.canRedo()}
+          >
+            <Redo2 className='h-4 w-4' /> Redo
           </Button>
           <Button
             onClick={handleResetClick}
