@@ -38,6 +38,10 @@ interface CanvasProps {
     componentId: string,
     newPosition: { x: number; y: number }
   ) => void;
+  onComponentUpdate?: (
+    componentId: string,
+    updates: Partial<CanvasComponent['props']>
+  ) => void;
 }
 
 const Canvas: React.FC<CanvasProps> = ({
@@ -46,6 +50,7 @@ const Canvas: React.FC<CanvasProps> = ({
   onComponentDrop,
   onComponentSelect,
   onComponentMove,
+  onComponentUpdate,
 }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
@@ -161,6 +166,11 @@ const Canvas: React.FC<CanvasProps> = ({
             isDragging={isDragging && isSelected}
             onSelect={handleComponentSelect}
             onMouseDown={handleComponentMouseDown}
+            onTextChange={(componentId, newText) => {
+              if (onComponentUpdate) {
+                onComponentUpdate(componentId, { text: newText });
+              }
+            }}
           />
         );
 
@@ -175,6 +185,11 @@ const Canvas: React.FC<CanvasProps> = ({
             isDragging={isDragging && isSelected}
             onSelect={handleComponentSelect}
             onMouseDown={handleComponentMouseDown}
+            onTextChange={(componentId, newText) => {
+              if (onComponentUpdate) {
+                onComponentUpdate(componentId, { text: newText });
+              }
+            }}
           />
         );
 

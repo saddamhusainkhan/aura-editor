@@ -1,17 +1,4 @@
 import { useState, useEffect, useRef } from 'react';
-import { HexColorPicker } from 'react-colorful';
-import Slider from 'rc-slider';
-import 'rc-slider/assets/index.css';
-import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import Palette from '@/components/Palette';
 import Canvas from '@/components/Canvas';
 import PropertiesPanel from '@/components/PropertiesPanel';
@@ -23,6 +10,7 @@ import { generateHTMLString, copyToClipboard } from '@/utils/htmlGenerator';
 import { storage } from '@/utils/storage';
 import type { CanvasComponent } from '@/utils/storage';
 import { HistoryManager } from '@/utils/history';
+import { Button } from '@/components/ui/button';
 import { Eye, Copy, Check, RotateCcw, Undo2, Redo2 } from 'lucide-react';
 
 function App() {
@@ -30,11 +18,6 @@ function App() {
   const [canvasComponents, setCanvasComponents] = useState<CanvasComponent[]>(
     []
   );
-  const [color, setColor] = useState('#3b82f6');
-  const [hue, setHue] = useState(0);
-  const [saturation, setSaturation] = useState(50);
-  const [lightness, setLightness] = useState(50);
-  const [opacity, setOpacity] = useState(100);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [isResetDialogOpen, setIsResetDialogOpen] = useState(false);
   const [toast, setToast] = useState<{
@@ -118,58 +101,11 @@ function App() {
     historyManager.current.push(newComponents, action);
   };
 
-  const handleColorChange = (newColor: string) => {
-    setColor(newColor);
-    if (selectedComponentId) {
-      // Update the selected component's color on canvas
-      updateCanvasWithHistory(
-        canvasComponents.map((comp) =>
-          comp.id === selectedComponentId
-            ? { ...comp, props: { ...comp.props, color: newColor } }
-            : comp
-        ),
-        'Color changed'
-      );
-    }
-  };
-
-  const handleHueChange = (value: number | number[]) => {
-    const hueValue = Array.isArray(value) ? value[0] : value;
-    setHue(hueValue);
-  };
-
-  const handleSaturationChange = (value: number | number[]) => {
-    const satValue = Array.isArray(value) ? value[0] : value;
-    setSaturation(satValue);
-  };
-
-  const handleLightnessChange = (value: number | number[]) => {
-    const lightValue = Array.isArray(value) ? value[0] : value;
-    setLightness(lightValue);
-  };
-
-  const handleOpacityChange = (value: number | number[]) => {
-    const opacityValue = Array.isArray(value) ? value[0] : value;
-    setOpacity(opacityValue);
-    if (selectedComponentId) {
-      // Update the selected component's opacity on canvas
-      updateCanvasWithHistory(
-        canvasComponents.map((comp) =>
-          comp.id === selectedComponentId
-            ? { ...comp, props: { ...comp.props, opacity: opacityValue } }
-            : comp
-        ),
-        'Opacity changed'
-      );
-    }
-  };
-
   const handlePaletteComponentSelect = (componentType: string) => {
-    // Create a new component instance when selected from palette
     const newComponent: CanvasComponent = {
       id: Date.now().toString(),
       type: componentType,
-      position: { x: 50, y: 50 }, // Default position
+      position: { x: 50, y: 50 },
       props: {
         text:
           componentType === 'text'
@@ -177,8 +113,8 @@ function App() {
             : componentType === 'button'
             ? 'Button'
             : undefined,
-        color: color,
-        opacity: opacity,
+        color: '#3b82f6',
+        opacity: 100,
         fontSize:
           componentType === 'text'
             ? 16
@@ -189,7 +125,6 @@ function App() {
             : undefined,
         fontWeight: componentType === 'text' ? 'normal' : undefined,
         textAlign: componentType === 'textarea' ? 'left' : undefined,
-        // Image properties
         src: componentType === 'image' ? undefined : undefined,
         alt: componentType === 'image' ? 'Image' : undefined,
         width: componentType === 'image' ? 120 : undefined,
@@ -201,7 +136,6 @@ function App() {
             : componentType === 'button'
             ? 6
             : undefined,
-        // Button properties
         url: componentType === 'button' ? undefined : undefined,
         padding: componentType === 'button' ? 8 : undefined,
         backgroundColor: componentType === 'button' ? '#3b82f6' : undefined,
@@ -228,8 +162,8 @@ function App() {
             : componentType === 'button'
             ? 'Button'
             : undefined,
-        color: color,
-        opacity: opacity,
+        color: '#3b82f6',
+        opacity: 100,
         fontSize:
           componentType === 'text'
             ? 16
@@ -240,7 +174,6 @@ function App() {
             : undefined,
         fontWeight: componentType === 'text' ? 'normal' : undefined,
         textAlign: componentType === 'textarea' ? 'left' : undefined,
-        // Image properties
         src: componentType === 'image' ? undefined : undefined,
         alt: componentType === 'image' ? 'Image' : undefined,
         width: componentType === 'image' ? 120 : undefined,
@@ -252,7 +185,6 @@ function App() {
             : componentType === 'button'
             ? 6
             : undefined,
-        // Button properties
         url: componentType === 'button' ? undefined : undefined,
         padding: componentType === 'button' ? 8 : undefined,
         backgroundColor: componentType === 'button' ? '#3b82f6' : undefined,
@@ -269,13 +201,6 @@ function App() {
 
   const handleComponentSelect = (componentId: string) => {
     setSelectedComponentId(componentId);
-    if (componentId && componentId !== '') {
-      const component = canvasComponents.find((comp) => comp.id === componentId);
-      if (component) {
-        setColor(component.props.color);
-        setOpacity(component.props.opacity);
-      }
-    }
   };
 
   const handleComponentMove = (
@@ -302,29 +227,6 @@ function App() {
       ),
       'Component updated'
     );
-
-    // Also update local state for color and opacity if the updated component is selected
-    if (componentId === selectedComponentId) {
-      if (updates.color !== undefined) {
-        setColor(updates.color);
-      }
-      if (updates.opacity !== undefined) {
-        setOpacity(updates.opacity);
-      }
-    }
-  };
-
-  const handleTextChange = (newText: string) => {
-    if (selectedComponentId) {
-      updateCanvasWithHistory(
-        canvasComponents.map((comp) =>
-          comp.id === selectedComponentId
-            ? { ...comp, props: { ...comp.props, text: newText } }
-            : comp
-        ),
-        'Text changed'
-      );
-    }
   };
 
   const handlePreview = () => {
@@ -428,7 +330,8 @@ function App() {
             <div className='w-2 h-2 bg-blue-500 rounded-full'></div>
             <span>History</span>
             <span className='text-xs'>
-              ({historyManager.current.getHistorySize()}/{historyManager.current.getStats().maxSize})
+              ({historyManager.current.getHistorySize()}/
+              {historyManager.current.getStats().maxSize})
             </span>
             <HistoryInfo
               historySize={historyManager.current.getHistorySize()}
@@ -495,6 +398,7 @@ function App() {
             onComponentDrop={handleComponentDrop}
             onComponentSelect={handleComponentSelect}
             onComponentMove={handleComponentMove}
+            onComponentUpdate={handleComponentUpdate}
           />
         </div>
 
