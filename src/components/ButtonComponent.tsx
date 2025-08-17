@@ -6,17 +6,25 @@ interface ButtonComponentProps {
   customProps: {
     text?: string;
     url?: string;
+    opacity: number;
     fontSize?: number;
-    padding?: number;
+    paddingTop?: number;
+    paddingRight?: number;
+    paddingBottom?: number;
+    paddingLeft?: number;
     backgroundColor?: string;
     textColor?: string;
-    borderRadius?: number;
-    opacity: number;
+    borderRadiusTop?: number;
+    borderRadiusRight?: number;
+    borderRadiusBottom?: number;
+    borderRadiusLeft?: number;
+    [key: string]: string | number | undefined;
   };
   isSelected: boolean;
   isDragging: boolean;
   onSelect: (componentId: string) => void;
   onMouseDown: (e: React.MouseEvent, componentId: string) => void;
+  zIndex: number;
 }
 
 const ButtonComponent: React.FC<ButtonComponentProps> = ({
@@ -27,6 +35,7 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
   isDragging,
   onSelect,
   onMouseDown,
+  zIndex,
 }) => {
   const handleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -49,19 +58,26 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
     left: position.x,
     top: position.y,
     opacity: customProps.opacity / 100,
+    zIndex: zIndex,
   };
 
   const buttonStyles = {
     fontSize: customProps.fontSize || 14,
-    padding: customProps.padding || 8,
+    padding: `${customProps.paddingTop || 8}px ${
+      customProps.paddingRight || 8
+    }px ${customProps.paddingBottom || 8}px ${customProps.paddingLeft || 8}px`,
     backgroundColor: customProps.backgroundColor || '#3b82f6',
     color: customProps.textColor || '#ffffff',
-    borderRadius: customProps.borderRadius || 6,
+    borderRadius: `${customProps.borderRadiusTop || 6}px ${
+      customProps.borderRadiusRight || 6
+    }px ${customProps.borderRadiusBottom || 6}px ${
+      customProps.borderRadiusLeft || 6
+    }px`,
   };
 
   const buttonContent = (
     <button
-      className='px-4 py-2 rounded text-sm font-medium transition-colors hover:opacity-80'
+      className='text-sm font-medium transition-colors hover:opacity-80'
       style={buttonStyles}
     >
       {customProps.text || 'Button'}

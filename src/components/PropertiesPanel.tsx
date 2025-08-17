@@ -2,21 +2,31 @@ import React from 'react';
 import { HexColorPicker } from 'react-colorful';
 import Slider from 'rc-slider';
 import 'rc-slider/assets/index.css';
-import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Button } from '@/components/ui/button';
+import {
+  ChevronDown,
+  ChevronRight,
+  Type,
+  Eye,
+  Layers,
+  Move,
+  Image,
+  Square,
+  Settings,
+  ClipboardList,
+  Container,
+  Rows,
+  Columns,
+} from 'lucide-react';
 
 interface CanvasComponent {
   id: string;
   type: string;
   position: { x: number; y: number };
+  zIndex: number;
   props: {
     text?: string;
     color: string;
@@ -26,13 +36,30 @@ interface CanvasComponent {
     textAlign?: string;
     src?: string;
     alt?: string;
-    width?: number;
-    height?: number;
     objectFit?: string;
+    borderRadius?: number;
+    borderRadiusTop?: number;
+    borderRadiusRight?: number;
+    borderRadiusBottom?: number;
+    borderRadiusLeft?: number;
+    height?: number;
+    width?: number;
     url?: string;
     padding?: number;
-    borderRadius?: number;
-    [key: string]: any;
+    paddingTop?: number;
+    paddingRight?: number;
+    paddingBottom?: number;
+    paddingLeft?: number;
+    backgroundColor?: string;
+    textColor?: string;
+    borderColor?: string;
+    borderWidth?: number;
+    maxWidth?: number;
+    gap?: number;
+    justifyContent?: string;
+    alignItems?: string;
+    gridSpan?: number;
+    [key: string]: string | number | undefined;
   };
 }
 
@@ -43,13 +70,91 @@ interface PropertiesPanelProps {
     componentId: string,
     updates: Partial<CanvasComponent['props']>
   ) => void;
+  onZIndexUpdate?: (componentId: string, newZIndex: number) => void;
 }
 
 const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
   selectedComponent,
   canvasComponents,
   onComponentUpdate,
+  onZIndexUpdate,
 }) => {
+  const [expandedSections, setExpandedSections] = React.useState<{
+    [key: string]: boolean;
+  }>({
+    padding: true,
+    borderradius: true,
+  });
+
+  const toggleSection = (section: string) => {
+    setExpandedSections((prev) => ({
+      ...prev,
+      [section]: !prev[section],
+    }));
+  };
+
+  const renderSlider = (
+    label: string,
+    value: number,
+    min: number,
+    max: number,
+    step: number,
+    onChange: (value: number) => void
+  ) => (
+    <div className='space-y-3'>
+      <div className='flex justify-between items-center'>
+        <Label className='text-sm font-medium text-slate-700 dark:text-slate-300'>
+          {label}
+        </Label>
+        <span className='text-sm font-mono text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded'>
+          {value}
+        </span>
+      </div>
+      <Slider
+        value={value}
+        min={min}
+        max={max}
+        step={step}
+        onChange={(sliderValue) => {
+          const numValue = Array.isArray(sliderValue)
+            ? sliderValue[0]
+            : sliderValue;
+          onChange(numValue);
+        }}
+        className='w-full'
+        trackStyle={{
+          backgroundColor: '#3b82f6',
+          height: 6,
+          borderRadius: 3,
+        }}
+        handleStyle={{
+          borderColor: '#3b82f6',
+          backgroundColor: '#ffffff',
+          borderWidth: 3,
+          width: 20,
+          height: 20,
+          marginTop: -7,
+          boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+          cursor: 'grab',
+        }}
+        railStyle={{
+          backgroundColor: '#e2e8f0',
+          height: 6,
+          borderRadius: 3,
+        }}
+        activeDotStyle={{
+          backgroundColor: '#1d4ed8',
+          borderColor: '#ffffff',
+          borderWidth: 2,
+        }}
+      />
+      <div className='flex justify-between text-xs text-slate-500 dark:text-slate-400'>
+        <span>{min}</span>
+        <span>{max}</span>
+      </div>
+    </div>
+  );
+
   const handleTextChange = (newText: string) => {
     if (selectedComponent) {
       onComponentUpdate(selectedComponent.id, { text: newText });
@@ -59,13 +164,6 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
   const handleColorChange = (newColor: string) => {
     if (selectedComponent) {
       onComponentUpdate(selectedComponent.id, { color: newColor });
-    }
-  };
-
-  const handleOpacityChange = (value: number | number[]) => {
-    if (selectedComponent) {
-      const opacityValue = Array.isArray(value) ? value[0] : value;
-      onComponentUpdate(selectedComponent.id, { opacity: opacityValue });
     }
   };
 
@@ -109,59 +207,21 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
     }
   };
 
-  const handleImageWidthChange = (newWidth: number) => {
-    if (selectedComponent) {
-      onComponentUpdate(selectedComponent.id, { width: newWidth });
-    }
-  };
-
-  const handleImageHeightChange = (newHeight: number) => {
-    if (selectedComponent) {
-      onComponentUpdate(selectedComponent.id, { height: newHeight });
-    }
-  };
-
   const handleImageObjectFitChange = (newFit: string) => {
     if (selectedComponent) {
       onComponentUpdate(selectedComponent.id, { objectFit: newFit });
     }
   };
 
-  const handleButtonTextChange = (newText: string) => {
+  const handleButtonBackgroundColorChange = (newColor: string) => {
     if (selectedComponent) {
-      onComponentUpdate(selectedComponent.id, { text: newText });
+      onComponentUpdate(selectedComponent.id, { backgroundColor: newColor });
     }
   };
 
   const handleButtonUrlChange = (newUrl: string) => {
     if (selectedComponent) {
       onComponentUpdate(selectedComponent.id, { url: newUrl });
-    }
-  };
-
-  const handleButtonFontSizeChange = (newFontSize: number) => {
-    if (selectedComponent) {
-      onComponentUpdate(selectedComponent.id, { fontSize: newFontSize });
-    }
-  };
-
-  const handleButtonPaddingChange = (newPadding: number) => {
-    if (selectedComponent) {
-      onComponentUpdate(selectedComponent.id, { padding: newPadding });
-    }
-  };
-
-  const handleButtonBorderRadiusChange = (newBorderRadius: number) => {
-    if (selectedComponent) {
-      onComponentUpdate(selectedComponent.id, {
-        borderRadius: newBorderRadius,
-      });
-    }
-  };
-
-  const handleButtonBackgroundColorChange = (newColor: string) => {
-    if (selectedComponent) {
-      onComponentUpdate(selectedComponent.id, { backgroundColor: newColor });
     }
   };
 
@@ -195,7 +255,8 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
     return (
       <div className='w-full h-full bg-white dark:bg-slate-800 flex flex-col'>
         <div className='p-4 border-b border-slate-200 dark:border-slate-700'>
-          <h2 className='text-lg font-semibold text-slate-900 dark:text-slate-100'>
+          <h2 className='text-lg font-semibold text-slate-900 dark:text-slate-100 flex items-center gap-2'>
+            <Settings className='w-5 h-5' />
             Properties
           </h2>
           <p className='text-sm text-slate-600 dark:text-slate-400 mt-1'>
@@ -212,7 +273,7 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
         <div className='flex-1 overflow-y-auto p-4'>
           <div className='text-center py-8'>
             <div className='text-4xl text-slate-300 dark:text-slate-600 mb-4'>
-              📋
+              <ClipboardList className='w-20 h-20 mx-auto' />
             </div>
             <h3 className='text-lg font-medium text-slate-600 dark:text-slate-400 mb-2'>
               No Component Selected
@@ -229,7 +290,8 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
   return (
     <div className='w-full h-full bg-white dark:bg-slate-800 flex flex-col'>
       <div className='p-4 border-b border-slate-200 dark:border-slate-700'>
-        <h2 className='text-lg font-semibold text-slate-900 dark:text-slate-100'>
+        <h2 className='text-lg font-semibold text-slate-900 dark:text-slate-100 flex items-center gap-2'>
+          <Settings className='w-5 h-5' />
           Properties
         </h2>
         <p className='text-sm text-slate-600 dark:text-slate-400 mt-1'>
@@ -258,11 +320,22 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                 <span className='font-medium'>Type:</span>{' '}
                 {selectedComponent.type}
               </div>
-              <div className='text-xs text-slate-600 dark:text-slate-400'>
-                <span className='font-medium'>Position:</span> X:{' '}
-                {Math.round(selectedComponent.position.x)}, Y:{' '}
-                {Math.round(selectedComponent.position.y)}
-              </div>
+              {/* Position Display */}
+              <Card className='shadow-sm'>
+                <CardHeader className='pb-3'>
+                  <CardTitle className='text-sm flex items-center gap-2'>
+                    <Move className='w-4 h-4' />
+                    Position
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className='text-xs text-slate-600 dark:text-slate-400'>
+                    <span className='font-medium'>Position:</span> X:{' '}
+                    {Math.round(selectedComponent.position.x)}, Y:{' '}
+                    {Math.round(selectedComponent.position.y)}
+                  </div>
+                </CardContent>
+              </Card>
             </CardContent>
           </Card>
 
@@ -270,7 +343,10 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
           {selectedComponent.type === 'text' && (
             <Card className='shadow-sm'>
               <CardHeader className='pb-3'>
-                <CardTitle className='text-sm'>Text Content</CardTitle>
+                <CardTitle className='text-sm flex items-center gap-2'>
+                  <Type className='w-4 h-4' />
+                  Text Content
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <Input
@@ -283,57 +359,449 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
             </Card>
           )}
 
-          {/* Font Size Control for Text Components */}
-          {selectedComponent.type === 'text' && (
-            <Card className='shadow-sm'>
-              <CardHeader className='pb-3'>
-                <CardTitle className='text-sm'>Font Size</CardTitle>
-              </CardHeader>
-              <CardContent className='space-y-3'>
-                <div className='space-y-2'>
-                  <div className='flex justify-between text-xs'>
-                    <span>
-                      Font Size: {selectedComponent.props.fontSize || 16}px
-                    </span>
-                  </div>
-                  <Slider
-                    min={8}
-                    max={72}
-                    value={selectedComponent.props.fontSize || 16}
-                    onChange={handleFontSizeChange}
-                    trackStyle={{ backgroundColor: '#3b82f6', height: 4 }}
-                    handleStyle={{
-                      borderColor: '#3b82f6',
-                      height: 16,
-                      width: 16,
-                      marginTop: -6,
-                    }}
-                    railStyle={{ backgroundColor: '#e2e8f0', height: 4 }}
-                  />
-                </div>
-                <div className='space-y-2'>
-                  <Label htmlFor='font-size-input' className='text-xs'>
-                    Font Size (px)
+          {/* Font Size Control */}
+          <Card className='shadow-sm'>
+            <CardHeader className='pb-3'>
+              <CardTitle className='text-sm flex items-center gap-2'>
+                <Type className='w-4 h-4' />
+                Font Size
+              </CardTitle>
+            </CardHeader>
+            <CardContent className='space-y-3'>
+              {renderSlider(
+                'Font Size',
+                selectedComponent.props.fontSize || 16,
+                8,
+                72,
+                1,
+                (value) =>
+                  onComponentUpdate(selectedComponent.id, { fontSize: value })
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Opacity Control */}
+          <Card className='shadow-sm'>
+            <CardHeader className='pb-3'>
+              <CardTitle className='text-sm flex items-center gap-2'>
+                <Eye className='w-4 h-4' />
+                Opacity
+              </CardTitle>
+            </CardHeader>
+            <CardContent className='space-y-3'>
+              {renderSlider(
+                'Opacity',
+                selectedComponent.props.opacity || 100,
+                0,
+                100,
+                1,
+                (value) =>
+                  onComponentUpdate(selectedComponent.id, { opacity: value })
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Z-Index Control */}
+          <Card className='shadow-sm'>
+            <CardHeader className='pb-3'>
+              <CardTitle className='text-sm flex items-center gap-2'>
+                <Layers className='w-4 h-4' />
+                Z-Index
+              </CardTitle>
+            </CardHeader>
+            <CardContent className='space-y-3'>
+              {renderSlider(
+                'Z-Index',
+                selectedComponent.zIndex,
+                0,
+                100,
+                1,
+                (value) => {
+                  if (onZIndexUpdate) {
+                    onZIndexUpdate(selectedComponent.id, value);
+                  }
+                }
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Combined Padding Control */}
+          <Card className='shadow-sm'>
+            <CardHeader className='pb-3'>
+              <CardTitle className='text-sm flex items-center gap-2'>
+                <Move className='w-4 h-4' />
+                Padding
+              </CardTitle>
+            </CardHeader>
+            <CardContent className='space-y-4'>
+              {/* Overall Padding Slider */}
+              <div className='space-y-3'>
+                <div className='flex justify-between items-center'>
+                  <Label className='text-sm font-medium text-slate-700 dark:text-slate-300'>
+                    Overall Padding
                   </Label>
-                  <Input
-                    id='font-size-input'
-                    type='number'
-                    min={8}
-                    max={72}
-                    value={selectedComponent.props.fontSize || 16}
-                    onChange={handleFontSizeInputChange}
-                    className='font-mono text-sm h-8'
-                  />
+                  <span className='text-sm font-mono text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded'>
+                    {Math.max(
+                      selectedComponent.props.paddingTop || 0,
+                      selectedComponent.props.paddingRight || 0,
+                      selectedComponent.props.paddingBottom || 0,
+                      selectedComponent.props.paddingLeft || 0
+                    )}
+                  </span>
                 </div>
-              </CardContent>
-            </Card>
-          )}
+                <Slider
+                  min={0}
+                  max={200}
+                  step={1}
+                  value={Math.max(
+                    selectedComponent.props.paddingTop || 0,
+                    selectedComponent.props.paddingRight || 0,
+                    selectedComponent.props.paddingBottom || 0,
+                    selectedComponent.props.paddingLeft || 0
+                  )}
+                  onChange={(value) => {
+                    const paddingValue = Array.isArray(value)
+                      ? value[0]
+                      : value;
+                    onComponentUpdate(selectedComponent.id, {
+                      paddingTop: paddingValue,
+                      paddingRight: paddingValue,
+                      paddingBottom: paddingValue,
+                      paddingLeft: paddingValue,
+                    });
+                  }}
+                  className='w-full'
+                  trackStyle={{
+                    backgroundColor: '#3b82f6',
+                    height: 6,
+                    borderRadius: 3,
+                  }}
+                  handleStyle={{
+                    borderColor: '#3b82f6',
+                    backgroundColor: '#ffffff',
+                    borderWidth: 3,
+                    width: 20,
+                    height: 20,
+                    marginTop: -7,
+                    boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+                    cursor: 'grab',
+                  }}
+                  railStyle={{
+                    backgroundColor: '#e2e8f0',
+                    height: 6,
+                    borderRadius: 3,
+                  }}
+                />
+                <div className='flex justify-between text-xs text-slate-500 dark:text-slate-400'>
+                  <span>0</span>
+                  <span>200</span>
+                </div>
+              </div>
+
+              {/* Individual Side Controls */}
+              <div className='border-t border-slate-200 dark:border-slate-700 pt-4'>
+                <div className='mb-3'>
+                  <div
+                    className='flex items-center justify-between cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700 rounded-lg p-2 -m-2 transition-colors'
+                    onClick={() => toggleSection('padding')}
+                  >
+                    <div className='flex items-center gap-2'>
+                      <Label className='text-sm font-medium text-slate-700 dark:text-slate-300'>
+                        Individual Sides
+                      </Label>
+                      <span className='text-xs text-slate-500 dark:text-slate-400'>
+                        Click to toggle
+                      </span>
+                    </div>
+                    {expandedSections['padding'] ? (
+                      <ChevronDown className='h-4 w-4 text-slate-500 dark:text-slate-400' />
+                    ) : (
+                      <ChevronRight className='h-4 w-4 text-slate-500 dark:text-slate-400' />
+                    )}
+                  </div>
+                </div>
+
+                {expandedSections['padding'] && (
+                  <div className='grid grid-cols-2 gap-4'>
+                    <div className='space-y-2'>
+                      <Label className='text-xs font-medium text-slate-600 dark:text-slate-400'>
+                        Top
+                      </Label>
+                      <Input
+                        type='number'
+                        value={selectedComponent.props.paddingTop || 0}
+                        min={0}
+                        max={200}
+                        step={1}
+                        onChange={(e) => {
+                          onComponentUpdate(selectedComponent.id, {
+                            paddingTop: Number(e.target.value),
+                          });
+                        }}
+                        onClick={(e) => e.stopPropagation()}
+                        className='h-9 text-sm border-slate-200 dark:border-slate-600 focus:border-blue-500 dark:focus:border-blue-400'
+                      />
+                    </div>
+                    <div className='space-y-2'>
+                      <Label className='text-xs font-medium text-slate-600 dark:text-slate-400'>
+                        Right
+                      </Label>
+                      <Input
+                        type='number'
+                        value={selectedComponent.props.paddingRight || 0}
+                        min={0}
+                        max={200}
+                        step={1}
+                        onChange={(e) => {
+                          onComponentUpdate(selectedComponent.id, {
+                            paddingRight: Number(e.target.value),
+                          });
+                        }}
+                        onClick={(e) => e.stopPropagation()}
+                        className='h-9 text-sm border-slate-200 dark:border-slate-600 focus:border-blue-500 dark:focus:border-blue-400'
+                      />
+                    </div>
+                    <div className='space-y-2'>
+                      <Label className='text-xs font-medium text-slate-600 dark:text-slate-400'>
+                        Bottom
+                      </Label>
+                      <Input
+                        type='number'
+                        value={selectedComponent.props.paddingBottom || 0}
+                        min={0}
+                        max={200}
+                        step={1}
+                        onChange={(e) => {
+                          onComponentUpdate(selectedComponent.id, {
+                            paddingBottom: Number(e.target.value),
+                          });
+                        }}
+                        onClick={(e) => e.stopPropagation()}
+                        className='h-9 text-sm border-slate-200 dark:border-slate-600 focus:border-blue-500 dark:focus:border-blue-400'
+                      />
+                    </div>
+                    <div className='space-y-2'>
+                      <Label className='text-xs font-medium text-slate-600 dark:text-slate-400'>
+                        Left
+                      </Label>
+                      <Input
+                        type='number'
+                        value={selectedComponent.props.paddingLeft || 0}
+                        min={0}
+                        max={200}
+                        step={1}
+                        onChange={(e) => {
+                          onComponentUpdate(selectedComponent.id, {
+                            paddingLeft: Number(e.target.value),
+                          });
+                        }}
+                        onClick={(e) => e.stopPropagation()}
+                        className='h-9 text-sm border-slate-200 dark:border-slate-600 focus:border-blue-500 dark:focus:border-blue-400'
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Combined Border Radius Control - Only for non-text components */}
+          {selectedComponent.type !== 'text' &&
+            selectedComponent.type !== 'textarea' && (
+              <Card className='shadow-sm'>
+                <CardHeader className='pb-3'>
+                  <CardTitle className='text-sm flex items-center gap-2'>
+                    <Image className='w-4 h-4' />
+                    Border Radius
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className='space-y-4'>
+                  {/* Overall Border Radius Slider */}
+                  <div className='space-y-3'>
+                    <div className='flex justify-between items-center'>
+                      <Label className='text-sm font-medium text-slate-700 dark:text-slate-300'>
+                        Overall Border Radius
+                      </Label>
+                      <span className='text-sm font-mono text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded'>
+                        {Math.max(
+                          selectedComponent.props.borderRadiusTop || 0,
+                          selectedComponent.props.borderRadiusRight || 0,
+                          selectedComponent.props.borderRadiusBottom || 0,
+                          selectedComponent.props.borderRadiusLeft || 0
+                        )}
+                      </span>
+                    </div>
+                    <Slider
+                      min={0}
+                      max={200}
+                      step={1}
+                      value={Math.max(
+                        selectedComponent.props.borderRadiusTop || 0,
+                        selectedComponent.props.borderRadiusRight || 0,
+                        selectedComponent.props.borderRadiusBottom || 0,
+                        selectedComponent.props.borderRadiusLeft || 0
+                      )}
+                      onChange={(value) => {
+                        const borderRadiusValue = Array.isArray(value)
+                          ? value[0]
+                          : value;
+                        onComponentUpdate(selectedComponent.id, {
+                          borderRadiusTop: borderRadiusValue,
+                          borderRadiusRight: borderRadiusValue,
+                          borderRadiusBottom: borderRadiusValue,
+                          borderRadiusLeft: borderRadiusValue,
+                        });
+                      }}
+                      className='w-full'
+                      trackStyle={{
+                        backgroundColor: '#3b82f6',
+                        height: 6,
+                        borderRadius: 3,
+                      }}
+                      handleStyle={{
+                        borderColor: '#3b82f6',
+                        backgroundColor: '#ffffff',
+                        borderWidth: 3,
+                        width: 20,
+                        height: 20,
+                        marginTop: -7,
+                        boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+                        cursor: 'grab',
+                      }}
+                      railStyle={{
+                        backgroundColor: '#e2e8f0',
+                        height: 6,
+                        borderRadius: 3,
+                      }}
+                    />
+                    <div className='flex justify-between text-xs text-slate-500 dark:text-slate-400'>
+                      <span>0</span>
+                      <span>200</span>
+                    </div>
+                  </div>
+
+                  {/* Individual Side Controls */}
+                  <div className='border-t border-slate-200 dark:border-slate-700 pt-4'>
+                    <div className='mb-3'>
+                      <div
+                        className='flex items-center justify-between cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700 rounded-lg p-2 -m-2 transition-colors'
+                        onClick={() => toggleSection('borderradius')}
+                      >
+                        <div className='flex items-center gap-2'>
+                          <Label className='text-sm font-medium text-slate-700 dark:text-slate-300'>
+                            Individual Sides
+                          </Label>
+                          <span className='text-xs text-slate-500 dark:text-slate-400'>
+                            Click to toggle
+                          </span>
+                        </div>
+                        {expandedSections['borderradius'] ? (
+                          <ChevronDown className='h-4 w-4 text-slate-500 dark:text-slate-400' />
+                        ) : (
+                          <ChevronRight className='h-4 w-4 text-slate-500 dark:text-slate-400' />
+                        )}
+                      </div>
+                    </div>
+
+                    {expandedSections['borderradius'] && (
+                      <div className='grid grid-cols-2 gap-4'>
+                        <div className='space-y-2'>
+                          <Label className='text-xs font-medium text-slate-600 dark:text-slate-400'>
+                            Top
+                          </Label>
+                          <Input
+                            type='number'
+                            value={selectedComponent.props.borderRadiusTop || 0}
+                            min={0}
+                            max={200}
+                            step={1}
+                            onChange={(e) => {
+                              onComponentUpdate(selectedComponent.id, {
+                                borderRadiusTop: Number(e.target.value),
+                              });
+                            }}
+                            onClick={(e) => e.stopPropagation()}
+                            className='h-9 text-sm border-slate-200 dark:border-slate-600 focus:border-blue-500 dark:focus:border-blue-400'
+                          />
+                        </div>
+                        <div className='space-y-2'>
+                          <Label className='text-xs font-medium text-slate-600 dark:text-slate-400'>
+                            Right
+                          </Label>
+                          <Input
+                            type='number'
+                            value={
+                              selectedComponent.props.borderRadiusRight || 0
+                            }
+                            min={0}
+                            max={200}
+                            step={1}
+                            onChange={(e) =>
+                              onComponentUpdate(selectedComponent.id, {
+                                borderRadiusRight: Number(e.target.value),
+                              })
+                            }
+                            onClick={(e) => e.stopPropagation()}
+                            className='h-9 text-sm border-slate-200 dark:border-slate-600 focus:border-blue-500 dark:focus:border-blue-400'
+                          />
+                        </div>
+                        <div className='space-y-2'>
+                          <Label className='text-xs font-medium text-slate-600 dark:text-slate-400'>
+                            Bottom
+                          </Label>
+                          <Input
+                            type='number'
+                            value={
+                              selectedComponent.props.borderRadiusBottom || 0
+                            }
+                            min={0}
+                            max={200}
+                            step={1}
+                            onChange={(e) =>
+                              onComponentUpdate(selectedComponent.id, {
+                                borderRadiusBottom: Number(e.target.value),
+                              })
+                            }
+                            onClick={(e) => e.stopPropagation()}
+                            className='h-9 text-sm border-slate-200 dark:border-slate-600 focus:border-blue-500 dark:focus:border-blue-400'
+                          />
+                        </div>
+                        <div className='space-y-2'>
+                          <Label className='text-xs font-medium text-slate-600 dark:text-slate-400'>
+                            Left
+                          </Label>
+                          <Input
+                            type='number'
+                            value={
+                              selectedComponent.props.borderRadiusLeft || 0
+                            }
+                            min={0}
+                            max={200}
+                            step={1}
+                            onChange={(e) =>
+                              onComponentUpdate(selectedComponent.id, {
+                                borderRadiusLeft: Number(e.target.value),
+                              })
+                            }
+                            onClick={(e) => e.stopPropagation()}
+                            className='h-9 text-sm border-slate-200 dark:border-slate-600 focus:border-blue-500 dark:focus:border-blue-400'
+                          />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
 
           {/* Font Weight Control for Text Components */}
           {selectedComponent.type === 'text' && (
             <Card className='shadow-sm'>
               <CardHeader className='pb-3'>
-                <CardTitle className='text-sm'>Font Weight</CardTitle>
+                <CardTitle className='text-sm flex items-center gap-2'>
+                  <Type className='w-4 h-4' />
+                  Font Weight
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className='space-y-2'>
@@ -364,7 +832,10 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
           {selectedComponent.type === 'textarea' && (
             <Card className='shadow-sm'>
               <CardHeader className='pb-3'>
-                <CardTitle className='text-sm'>Font Size</CardTitle>
+                <CardTitle className='text-sm flex items-center gap-2'>
+                  <Type className='w-4 h-4' />
+                  Font Size
+                </CardTitle>
               </CardHeader>
               <CardContent className='space-y-3'>
                 <div className='space-y-2'>
@@ -410,7 +881,10 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
           {selectedComponent.type === 'textarea' && (
             <Card className='shadow-sm'>
               <CardHeader className='pb-3'>
-                <CardTitle className='text-sm'>Text Alignment</CardTitle>
+                <CardTitle className='text-sm flex items-center gap-2'>
+                  <Type className='w-4 h-4' />
+                  Text Alignment
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className='space-y-2'>
@@ -462,7 +936,10 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
           {selectedComponent.type === 'image' && (
             <Card className='shadow-sm'>
               <CardHeader className='pb-3'>
-                <CardTitle className='text-sm'>Image Properties</CardTitle>
+                <CardTitle className='text-sm flex items-center gap-2'>
+                  <Image className='w-4 h-4' />
+                  Image Properties
+                </CardTitle>
               </CardHeader>
               <CardContent className='space-y-3'>
                 <div className='space-y-2'>
@@ -500,40 +977,24 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                 <CardTitle className='text-sm'>Dimensions</CardTitle>
               </CardHeader>
               <CardContent className='space-y-3'>
-                <div className='grid grid-cols-2 gap-3'>
-                  <div className='space-y-2'>
-                    <Label htmlFor='image-width' className='text-xs'>
-                      Width (px)
-                    </Label>
-                    <Input
-                      id='image-width'
-                      type='number'
-                      min={50}
-                      max={500}
-                      value={selectedComponent.props.width || 120}
-                      onChange={(e) =>
-                        handleImageWidthChange(parseInt(e.target.value) || 120)
-                      }
-                      className='text-sm h-8'
-                    />
-                  </div>
-                  <div className='space-y-2'>
-                    <Label htmlFor='image-height' className='text-xs'>
-                      Height (px)
-                    </Label>
-                    <Input
-                      id='image-height'
-                      type='number'
-                      min={50}
-                      max={500}
-                      value={selectedComponent.props.height || 120}
-                      onChange={(e) =>
-                        handleImageHeightChange(parseInt(e.target.value) || 120)
-                      }
-                      className='text-sm h-8'
-                    />
-                  </div>
-                </div>
+                {renderSlider(
+                  'Width',
+                  selectedComponent.props.width || 120,
+                  50,
+                  500,
+                  1,
+                  (value) =>
+                    onComponentUpdate(selectedComponent.id, { width: value })
+                )}
+                {renderSlider(
+                  'Height',
+                  selectedComponent.props.height || 120,
+                  50,
+                  500,
+                  1,
+                  (value) =>
+                    onComponentUpdate(selectedComponent.id, { height: value })
+                )}
               </CardContent>
             </Card>
           )}
@@ -575,9 +1036,12 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
           {selectedComponent.type === 'button' && (
             <Card className='shadow-sm'>
               <CardHeader className='pb-3'>
-                <CardTitle className='text-sm'>Button Properties</CardTitle>
+                <CardTitle className='text-sm flex items-center gap-2'>
+                  <Square className='w-4 h-4' />
+                  Button Properties
+                </CardTitle>
               </CardHeader>
-              <CardContent className='space-y-3'>
+              <CardContent className='space-y-4'>
                 <div className='space-y-2'>
                   <Label htmlFor='button-text' className='text-xs'>
                     Button Text
@@ -585,14 +1049,14 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                   <Input
                     id='button-text'
                     value={selectedComponent.props.text || ''}
-                    onChange={(e) => handleButtonTextChange(e.target.value)}
+                    onChange={(e) => handleTextChange(e.target.value)}
                     placeholder='Button text'
                     className='text-sm h-8'
                   />
                 </div>
                 <div className='space-y-2'>
                   <Label htmlFor='button-url' className='text-xs'>
-                    URL (optional)
+                    Button URL
                   </Label>
                   <Input
                     id='button-url'
@@ -610,59 +1074,21 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
           {selectedComponent.type === 'button' && (
             <Card className='shadow-sm'>
               <CardHeader className='pb-3'>
-                <CardTitle className='text-sm'>Button Styling</CardTitle>
+                <CardTitle className='text-sm flex items-center gap-2'>
+                  <Square className='w-4 h-4' />
+                  Button Styling
+                </CardTitle>
               </CardHeader>
               <CardContent className='space-y-3'>
-                <div className='space-y-2'>
-                  <Label htmlFor='button-font-size' className='text-xs'>
-                    Font Size (px)
-                  </Label>
-                  <Input
-                    id='button-font-size'
-                    type='number'
-                    min={8}
-                    max={32}
-                    value={selectedComponent.props.fontSize || 14}
-                    onChange={(e) =>
-                      handleButtonFontSizeChange(parseInt(e.target.value) || 14)
-                    }
-                    className='text-sm h-8'
-                  />
-                </div>
-                <div className='space-y-2'>
-                  <Label htmlFor='button-padding' className='text-xs'>
-                    Padding (px)
-                  </Label>
-                  <Input
-                    id='button-padding'
-                    type='number'
-                    min={4}
-                    max={32}
-                    value={selectedComponent.props.padding || 8}
-                    onChange={(e) =>
-                      handleButtonPaddingChange(parseInt(e.target.value) || 8)
-                    }
-                    className='text-sm h-8'
-                  />
-                </div>
-                <div className='space-y-2'>
-                  <Label htmlFor='button-border-radius' className='text-xs'>
-                    Border Radius (px)
-                  </Label>
-                  <Input
-                    id='button-border-radius'
-                    type='number'
-                    min={0}
-                    max={50}
-                    value={selectedComponent.props.borderRadius || 6}
-                    onChange={(e) =>
-                      handleButtonBorderRadiusChange(
-                        parseInt(e.target.value) || 6
-                      )
-                    }
-                    className='text-sm h-8'
-                  />
-                </div>
+                {renderSlider(
+                  'Font Size',
+                  selectedComponent.props.fontSize || 14,
+                  8,
+                  32,
+                  1,
+                  (value) =>
+                    onComponentUpdate(selectedComponent.id, { fontSize: value })
+                )}
               </CardContent>
             </Card>
           )}
@@ -671,7 +1097,16 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
           {selectedComponent.type === 'button' && (
             <Card className='shadow-sm'>
               <CardHeader className='pb-3'>
-                <CardTitle className='text-sm'>Button Colors</CardTitle>
+                <CardTitle className='text-sm flex items-center gap-2'>
+                  <div
+                    className='w-4 h-4 rounded-full border-2 border-slate-300 dark:border-slate-600'
+                    style={{
+                      backgroundColor:
+                        selectedComponent.props.backgroundColor || '#3b82f6',
+                    }}
+                  ></div>
+                  Button Colors
+                </CardTitle>
               </CardHeader>
               <CardContent className='space-y-3'>
                 <div className='space-y-2'>
@@ -718,85 +1153,29 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
             </Card>
           )}
 
-          {/* Color Picker */}
+          {/* Color Control */}
           <Card className='shadow-sm'>
             <CardHeader className='pb-3'>
-              <CardTitle className='text-sm'>Color</CardTitle>
+              <CardTitle className='text-sm flex items-center gap-2'>
+                <div
+                  className='w-4 h-4 rounded-full border-2 border-slate-300 dark:border-slate-600'
+                  style={{ backgroundColor: selectedComponent.props.color }}
+                ></div>
+                Color
+              </CardTitle>
             </CardHeader>
-            <CardContent className='space-y-3'>
-              <div className='flex justify-center'>
-                <HexColorPicker
-                  color={selectedComponent.props.color}
-                  onChange={handleColorChange}
-                  style={{ width: '100%', height: '120px' }}
-                />
-              </div>
-              <div className='space-y-2'>
-                <Label htmlFor='hex-input' className='text-xs'>
-                  Hex Color
-                </Label>
-                <Input
-                  id='hex-input'
-                  value={selectedComponent.props.color}
-                  onChange={(e) => handleColorChange(e.target.value)}
-                  className='font-mono text-sm h-8'
-                />
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Opacity Control */}
-          <Card className='shadow-sm'>
-            <CardHeader className='pb-3'>
-              <CardTitle className='text-sm'>Opacity</CardTitle>
-            </CardHeader>
-            <CardContent className='space-y-3'>
-              <div className='space-y-2'>
-                <div className='flex justify-between text-xs'>
-                  <span>Opacity: {selectedComponent.props.opacity}%</span>
-                </div>
-                <Slider
-                  min={0}
-                  max={100}
-                  value={selectedComponent.props.opacity}
-                  onChange={handleOpacityChange}
-                  trackStyle={{ backgroundColor: '#3b82f6', height: 4 }}
-                  handleStyle={{
-                    borderColor: '#3b82f6',
-                    height: 16,
-                    width: 16,
-                    marginTop: -6,
-                  }}
-                  railStyle={{ backgroundColor: '#e2e8f0', height: 4 }}
-                />
-              </div>
-
-              <div className='space-y-2'>
-                <Label className='text-xs'>Preview</Label>
-                <div className='grid grid-cols-2 gap-2'>
-                  <div className='h-12 rounded border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 flex items-center justify-center'>
-                    <div
-                      className='w-8 h-8 rounded'
-                      style={{
-                        backgroundColor: selectedComponent.props.color,
-                        opacity: selectedComponent.props.opacity / 100,
-                      }}
-                    />
-                  </div>
-                  <div
-                    className='h-12 rounded border border-slate-200 dark:border-slate-700'
-                    style={{
-                      backgroundColor: `${
-                        selectedComponent.props.color
-                      }${Math.round(
-                        (selectedComponent.props.opacity / 100) * 255
-                      )
-                        .toString(16)
-                        .padStart(2, '0')}`,
-                    }}
-                  />
-                </div>
-              </div>
+            <CardContent>
+              <HexColorPicker
+                color={selectedComponent.props.color}
+                onChange={handleColorChange}
+                className='w-full'
+              />
+              <Input
+                value={selectedComponent.props.color}
+                onChange={(e) => handleColorChange(e.target.value)}
+                className='mt-3 text-sm h-8 font-mono'
+                placeholder='#000000'
+              />
             </CardContent>
           </Card>
 
@@ -804,7 +1183,10 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
           {selectedComponent.type === 'image' && (
             <Card className='shadow-sm'>
               <CardHeader className='pb-3'>
-                <CardTitle className='text-sm'>Border Radius</CardTitle>
+                <CardTitle className='text-sm flex items-center gap-2'>
+                  <Image className='w-4 h-4' />
+                  Border Radius
+                </CardTitle>
               </CardHeader>
               <CardContent className='space-y-3'>
                 <div className='space-y-2'>
@@ -851,6 +1233,410 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                     }
                     className='text-sm h-8'
                   />
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Container Properties */}
+          {selectedComponent.type === 'container' && (
+            <Card className='shadow-sm'>
+              <CardHeader className='pb-3'>
+                <CardTitle className='text-sm flex items-center gap-2'>
+                  <Container className='w-4 h-4' />
+                  Container Properties
+                </CardTitle>
+              </CardHeader>
+              <CardContent className='space-y-4'>
+                {/* Container Dimensions */}
+                <div className='space-y-3'>
+                  <Label className='text-sm font-medium text-slate-700 dark:text-slate-300'>
+                    Dimensions
+                  </Label>
+                  <div className='grid grid-cols-2 gap-3'>
+                    <div className='space-y-2'>
+                      <Label className='text-xs'>Width (px)</Label>
+                      <Input
+                        type='number'
+                        value={selectedComponent.props.width || 400}
+                        min={100}
+                        max={2000}
+                        step={10}
+                        onChange={(e) =>
+                          onComponentUpdate(selectedComponent.id, {
+                            width: Number(e.target.value),
+                          })
+                        }
+                        className='h-8 text-sm'
+                      />
+                    </div>
+                    <div className='space-y-2'>
+                      <Label className='text-xs'>Height (px)</Label>
+                      <Input
+                        type='number'
+                        value={selectedComponent.props.height || 300}
+                        min={100}
+                        max={2000}
+                        step={10}
+                        onChange={(e) =>
+                          onComponentUpdate(selectedComponent.id, {
+                            height: Number(e.target.value),
+                          })
+                        }
+                        className='h-8 text-sm'
+                      />
+                    </div>
+                  </div>
+                  <div className='space-y-2'>
+                    <Label className='text-xs'>Max Width (px)</Label>
+                    <Input
+                      type='number'
+                      value={selectedComponent.props.maxWidth || 1200}
+                      min={200}
+                      max={3000}
+                      step={50}
+                      onChange={(e) =>
+                        onComponentUpdate(selectedComponent.id, {
+                          maxWidth: Number(e.target.value),
+                        })
+                      }
+                      className='h-8 text-sm'
+                    />
+                  </div>
+                </div>
+
+                {/* Container Styling */}
+                <div className='space-y-3'>
+                  <Label className='text-sm font-medium text-slate-700 dark:text-slate-300'>
+                    Container Styling
+                  </Label>
+                  <div className='space-y-2'>
+                    <Label className='text-xs'>Background Color</Label>
+                    <HexColorPicker
+                      color={
+                        selectedComponent.props.backgroundColor || '#f8fafc'
+                      }
+                      onChange={(color) =>
+                        onComponentUpdate(selectedComponent.id, {
+                          backgroundColor: color,
+                        })
+                      }
+                      className='w-full h-32'
+                    />
+                  </div>
+                  <div className='space-y-2'>
+                    <Label className='text-xs'>Border Color</Label>
+                    <HexColorPicker
+                      color={selectedComponent.props.borderColor || '#e2e8f0'}
+                      onChange={(color) =>
+                        onComponentUpdate(selectedComponent.id, {
+                          borderColor: color,
+                        })
+                      }
+                      className='w-full h-32'
+                    />
+                  </div>
+                  <div className='space-y-2'>
+                    <Label className='text-xs'>Border Width (px)</Label>
+                    <Input
+                      type='number'
+                      value={selectedComponent.props.borderWidth || 1}
+                      min={0}
+                      max={10}
+                      step={1}
+                      onChange={(e) =>
+                        onComponentUpdate(selectedComponent.id, {
+                          borderWidth: Number(e.target.value),
+                        })
+                      }
+                      className='h-8 text-sm'
+                    />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Row Properties */}
+          {selectedComponent.type === 'row' && (
+            <Card className='shadow-sm'>
+              <CardHeader className='pb-3'>
+                <CardTitle className='text-sm flex items-center gap-2'>
+                  <Rows className='w-4 h-4' />
+                  Row Properties
+                </CardTitle>
+              </CardHeader>
+              <CardContent className='space-y-4'>
+                {/* Row Dimensions */}
+                <div className='space-y-3'>
+                  <Label className='text-sm font-medium text-slate-700 dark:text-slate-300'>
+                    Dimensions
+                  </Label>
+                  <div className='grid grid-cols-2 gap-3'>
+                    <div className='space-y-2'>
+                      <Label className='text-xs'>Width (px)</Label>
+                      <Input
+                        type='number'
+                        value={selectedComponent.props.width || 600}
+                        min={200}
+                        max={2000}
+                        step={10}
+                        onChange={(e) =>
+                          onComponentUpdate(selectedComponent.id, {
+                            width: Number(e.target.value),
+                          })
+                        }
+                        className='h-8 text-sm'
+                      />
+                    </div>
+                    <div className='space-y-2'>
+                      <Label className='text-xs'>Height (px)</Label>
+                      <Input
+                        type='number'
+                        value={selectedComponent.props.height || 100}
+                        min={50}
+                        max={500}
+                        step={10}
+                        onChange={(e) =>
+                          onComponentUpdate(selectedComponent.id, {
+                            height: Number(e.target.value),
+                          })
+                        }
+                        className='h-8 text-sm'
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Row Layout */}
+                <div className='space-y-3'>
+                  <Label className='text-sm font-medium text-slate-700 dark:text-slate-300'>
+                    Layout
+                  </Label>
+                  <div className='space-y-2'>
+                    <Label className='text-xs'>Gap (px)</Label>
+                    <Input
+                      type='number'
+                      value={selectedComponent.props.gap || 16}
+                      min={0}
+                      max={100}
+                      step={2}
+                      onChange={(e) =>
+                        onComponentUpdate(selectedComponent.id, {
+                          gap: Number(e.target.value),
+                        })
+                      }
+                      className='h-8 text-sm'
+                    />
+                  </div>
+                  <div className='space-y-2'>
+                    <Label className='text-xs'>Justify Content</Label>
+                    <select
+                      value={
+                        selectedComponent.props.justifyContent || 'flex-start'
+                      }
+                      onChange={(e) =>
+                        onComponentUpdate(selectedComponent.id, {
+                          justifyContent: e.target.value,
+                        })
+                      }
+                      className='w-full h-8 text-sm border border-slate-200 dark:border-slate-600 rounded px-2 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100'
+                    >
+                      <option value='flex-start'>Start</option>
+                      <option value='center'>Center</option>
+                      <option value='flex-end'>End</option>
+                      <option value='space-between'>Space Between</option>
+                      <option value='space-around'>Space Around</option>
+                      <option value='space-evenly'>Space Evenly</option>
+                    </select>
+                  </div>
+                  <div className='space-y-2'>
+                    <Label className='text-xs'>Align Items</Label>
+                    <select
+                      value={selectedComponent.props.alignItems || 'center'}
+                      onChange={(e) =>
+                        onComponentUpdate(selectedComponent.id, {
+                          alignItems: e.target.value,
+                        })
+                      }
+                      className='w-full h-8 text-sm border border-slate-200 dark:border-slate-600 rounded px-2 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100'
+                    >
+                      <option value='flex-start'>Start</option>
+                      <option value='center'>Center</option>
+                      <option value='flex-end'>End</option>
+                      <option value='stretch'>Stretch</option>
+                      <option value='baseline'>Baseline</option>
+                    </select>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Column Properties */}
+          {selectedComponent.type === 'column' && (
+            <Card className='shadow-sm'>
+              <CardHeader className='pb-3'>
+                <CardTitle className='text-sm flex items-center gap-2'>
+                  <Columns className='w-4 h-4' />
+                  Column Properties
+                </CardTitle>
+              </CardHeader>
+              <CardContent className='space-y-4'>
+                {/* Column Dimensions */}
+                <div className='space-y-3'>
+                  <Label className='text-sm font-medium text-slate-700 dark:text-slate-300'>
+                    Dimensions
+                  </Label>
+                  <div className='grid grid-cols-2 gap-3'>
+                    <div className='space-y-2'>
+                      <Label className='text-xs'>Width (px)</Label>
+                      <Input
+                        type='number'
+                        value={selectedComponent.props.width || 200}
+                        min={100}
+                        max={1000}
+                        step={10}
+                        onChange={(e) =>
+                          onComponentUpdate(selectedComponent.id, {
+                            width: Number(e.target.value),
+                          })
+                        }
+                        className='h-8 text-sm'
+                      />
+                    </div>
+                    <div className='space-y-2'>
+                      <Label className='text-xs'>Height (px)</Label>
+                      <Input
+                        type='number'
+                        value={selectedComponent.props.height || 150}
+                        min={50}
+                        max={1000}
+                        step={10}
+                        onChange={(e) =>
+                          onComponentUpdate(selectedComponent.id, {
+                            height: Number(e.target.value),
+                          })
+                        }
+                        className='h-8 text-sm'
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* 12-Grid System */}
+                <div className='space-y-3'>
+                  <Label className='text-sm font-medium text-slate-700 dark:text-slate-300'>
+                    12-Grid System
+                  </Label>
+                  <div className='space-y-2'>
+                    <Label className='text-xs'>Grid Span (1-12)</Label>
+                    <div className='flex items-center gap-2'>
+                      <Input
+                        type='number'
+                        value={selectedComponent.props.gridSpan || 6}
+                        min={1}
+                        max={12}
+                        step={1}
+                        onChange={(e) =>
+                          onComponentUpdate(selectedComponent.id, {
+                            gridSpan: Number(e.target.value),
+                          })
+                        }
+                        className='h-8 text-sm flex-1'
+                      />
+                      <span className='text-xs text-slate-500 dark:text-slate-400 font-mono'>
+                        ={' '}
+                        {(
+                          ((selectedComponent.props.gridSpan || 6) / 12) *
+                          100
+                        ).toFixed(1)}
+                        %
+                      </span>
+                    </div>
+                  </div>
+                  <div className='grid grid-cols-12 gap-1'>
+                    {Array.from({ length: 12 }, (_, i) => (
+                      <button
+                        key={i}
+                        onClick={() =>
+                          onComponentUpdate(selectedComponent.id, {
+                            gridSpan: i + 1,
+                          })
+                        }
+                        className={`h-6 text-xs rounded transition-colors ${
+                          (selectedComponent.props.gridSpan || 6) === i + 1
+                            ? 'bg-pink-500 text-white'
+                            : 'bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-300 dark:hover:bg-slate-600'
+                        }`}
+                        title={`${i + 1}/12 columns`}
+                      >
+                        {i + 1}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Column Layout */}
+                <div className='space-y-3'>
+                  <Label className='text-sm font-medium text-slate-700 dark:text-slate-300'>
+                    Layout
+                  </Label>
+                  <div className='space-y-2'>
+                    <Label className='text-xs'>Gap (px)</Label>
+                    <Input
+                      type='number'
+                      value={selectedComponent.props.gap || 16}
+                      min={0}
+                      max={100}
+                      step={2}
+                      onChange={(e) =>
+                        onComponentUpdate(selectedComponent.id, {
+                          gap: Number(e.target.value),
+                        })
+                      }
+                      className='h-8 text-sm'
+                    />
+                  </div>
+                  <div className='space-y-2'>
+                    <Label className='text-xs'>Justify Content</Label>
+                    <select
+                      value={
+                        selectedComponent.props.justifyContent || 'flex-start'
+                      }
+                      onChange={(e) =>
+                        onComponentUpdate(selectedComponent.id, {
+                          justifyContent: e.target.value,
+                        })
+                      }
+                      className='w-full h-8 text-sm border border-slate-200 dark:border-slate-600 rounded px-2 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100'
+                    >
+                      <option value='flex-start'>Start</option>
+                      <option value='center'>Center</option>
+                      <option value='flex-end'>End</option>
+                      <option value='space-between'>Space Between</option>
+                      <option value='space-around'>Space Around</option>
+                      <option value='space-evenly'>Space Evenly</option>
+                    </select>
+                  </div>
+                  <div className='space-y-2'>
+                    <Label className='text-xs'>Align Items</Label>
+                    <select
+                      value={selectedComponent.props.alignItems || 'flex-start'}
+                      onChange={(e) =>
+                        onComponentUpdate(selectedComponent.id, {
+                          alignItems: e.target.value,
+                        })
+                      }
+                      className='w-full h-8 text-sm border border-slate-200 dark:border-slate-600 rounded px-2 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100'
+                    >
+                      <option value='flex-start'>Start</option>
+                      <option value='center'>Center</option>
+                      <option value='flex-end'>End</option>
+                      <option value='stretch'>Stretch</option>
+                      <option value='baseline'>Baseline</option>
+                    </select>
+                  </div>
                 </div>
               </CardContent>
             </Card>

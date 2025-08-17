@@ -10,6 +10,12 @@ interface TextComponentProps {
     opacity: number;
     fontSize?: number;
     fontWeight?: string;
+    fontStyle?: string;
+    textDecoration?: string;
+    paddingTop?: number;
+    paddingRight?: number;
+    paddingBottom?: number;
+    paddingLeft?: number;
     [key: string]: string | number | undefined;
   };
   isSelected: boolean;
@@ -17,7 +23,12 @@ interface TextComponentProps {
   onSelect: (componentId: string) => void;
   onMouseDown: (e: React.MouseEvent, componentId: string) => void;
   onTextChange?: (componentId: string, newText: string) => void;
+  onStyleChange?: (
+    componentId: string,
+    styles: { fontWeight?: string; fontStyle?: string; textDecoration?: string }
+  ) => void;
   onDelete?: (componentId: string) => void;
+  zIndex: number;
 }
 
 const TextComponent: React.FC<TextComponentProps> = ({
@@ -29,18 +40,35 @@ const TextComponent: React.FC<TextComponentProps> = ({
   onSelect,
   onMouseDown,
   onTextChange,
+  onStyleChange,
   onDelete,
+  zIndex,
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editText, setEditText] = useState(customProps.text || 'Default Text');
   const [showToolbar, setShowToolbar] = useState(false);
+  const [currentStyles, setCurrentStyles] = useState({
+    fontWeight: customProps.fontWeight || 'normal',
+    fontStyle: 'normal',
+    textDecoration: 'none',
+  });
   const textRef = useRef<HTMLDivElement>(null);
   const toolbarRef = useRef<HTMLDivElement>(null);
 
-  // Update edit text when customProps.text changes
+  // Update edit text and styles when customProps change
   useEffect(() => {
     setEditText(customProps.text || 'Default Text');
-  }, [customProps.text]);
+    setCurrentStyles({
+      fontWeight: (customProps.fontWeight as string) || 'normal',
+      fontStyle: (customProps.fontStyle as string) || 'normal',
+      textDecoration: (customProps.textDecoration as string) || 'none',
+    });
+  }, [
+    customProps.text,
+    customProps.fontWeight,
+    customProps.fontStyle,
+    customProps.textDecoration,
+  ]);
 
   const handleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -92,24 +120,29 @@ const TextComponent: React.FC<TextComponentProps> = ({
     }
   };
 
-  const execFormatCommand = (command: string, value?: string) => {
-    if (textRef.current) {
-      textRef.current.focus();
-      document.execCommand(command, false, value);
-    }
-  };
-
   const handleFormatClick = (format: string) => {
+    let newStyles = { ...currentStyles };
+
     switch (format) {
       case 'bold':
-        execFormatCommand('bold');
+        newStyles.fontWeight =
+          currentStyles.fontWeight === 'bold' ? 'normal' : 'bold';
         break;
       case 'italic':
-        execFormatCommand('italic');
+        newStyles.fontStyle =
+          currentStyles.fontStyle === 'italic' ? 'normal' : 'italic';
         break;
       case 'underline':
-        execFormatCommand('underline');
+        newStyles.textDecoration =
+          currentStyles.textDecoration === 'underline' ? 'none' : 'underline';
         break;
+    }
+
+    setCurrentStyles(newStyles);
+
+    // Save styles to component properties
+    if (onStyleChange) {
+      onStyleChange(id, newStyles);
     }
   };
 
@@ -125,18 +158,25 @@ const TextComponent: React.FC<TextComponentProps> = ({
     left: position.x,
     top: position.y,
     opacity: customProps.opacity / 100,
+    zIndex: zIndex,
   };
 
   const textStyles = {
     color: customProps.color,
     fontSize: customProps.fontSize || 16,
-    fontWeight: customProps.fontWeight || 'normal',
+    fontWeight: currentStyles.fontWeight,
+    fontStyle: currentStyles.fontStyle,
+    textDecoration: currentStyles.textDecoration,
+    paddingTop: customProps.paddingTop || 8,
+    paddingRight: customProps.paddingRight || 12,
+    paddingBottom: customProps.paddingBottom || 8,
+    paddingLeft: customProps.paddingLeft || 12,
   };
 
   return (
     <>
       <div
-        className={`${baseClasses} ${cursorClass} px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded shadow-sm`}
+        className={`${baseClasses} ${cursorClass} bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded shadow-sm`}
         style={inlineStyles}
         onMouseDown={handleMouseDown}
         onClick={handleClick}
@@ -168,21 +208,33 @@ const TextComponent: React.FC<TextComponentProps> = ({
         >
           <button
             onClick={() => handleFormatClick('bold')}
-            className='p-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100 transition-colors'
+            className={`p-1.5 rounded transition-colors ${
+              currentStyles.fontWeight === 'bold'
+                ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
+                : 'hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100'
+            }`}
             title='Bold (Ctrl+B)'
           >
             <Bold className='h-4 w-4' />
           </button>
           <button
             onClick={() => handleFormatClick('italic')}
-            className='p-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100 transition-colors'
+            className={`p-1.5 rounded transition-colors ${
+              currentStyles.fontStyle === 'italic'
+                ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
+                : 'hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100'
+            }`}
             title='Italic (Ctrl+I)'
           >
             <Italic className='h-4 w-4' />
           </button>
           <button
             onClick={() => handleFormatClick('underline')}
-            className='p-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100 transition-colors'
+            className={`p-1.5 rounded transition-colors ${
+              currentStyles.textDecoration === 'underline'
+                ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
+                : 'hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100'
+            }`}
             title='Underline (Ctrl+U)'
           >
             <Underline className='h-4 w-4' />

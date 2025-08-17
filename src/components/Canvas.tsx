@@ -1,31 +1,53 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { X } from 'lucide-react';
+import { X, Palette, Target, Move } from 'lucide-react';
 import TextComponent from './TextComponent';
 import TextAreaComponent from './TextAreaComponent';
 import ImageComponent from './ImageComponent';
 import ButtonComponent from './ButtonComponent';
+import ContainerComponent from './ContainerComponent';
+import RowComponent from './RowComponent';
+import ColumnComponent from './ColumnComponent';
 
 interface CanvasComponent {
   id: string;
   type: string;
   position: { x: number; y: number };
+  zIndex: number;
   props: {
     text?: string;
     color: string;
     opacity: number;
     fontSize?: number;
     fontWeight?: string;
+    fontStyle?: string;
+    textDecoration?: string;
     textAlign?: string;
     src?: string;
     alt?: string;
     objectFit?: string;
     borderRadius?: number;
+    borderRadiusTop?: number;
+    borderRadiusRight?: number;
+    borderRadiusBottom?: number;
+    borderRadiusLeft?: number;
     height?: number;
     width?: number;
     url?: string;
     padding?: number;
+    paddingTop?: number;
+    paddingRight?: number;
+    paddingBottom?: number;
+    paddingLeft?: number;
     backgroundColor?: string;
     textColor?: string;
+    // Layout-specific properties
+    maxWidth?: number;
+    gridSpan?: number;
+    gap?: number;
+    justifyContent?: string;
+    alignItems?: string;
+    borderColor?: string;
+    borderWidth?: number;
     [key: string]: string | number | undefined;
   };
 }
@@ -44,6 +66,11 @@ interface CanvasProps {
     updates: Partial<CanvasComponent['props']>
   ) => void;
   onComponentDelete?: (componentId: string) => void;
+  onComponentMoveWithoutHistory?: (
+    componentId: string,
+    newPosition: { x: number; y: number }
+  ) => void;
+  onZIndexUpdate?: (componentId: string, newZIndex: number) => void;
 }
 
 const Canvas: React.FC<CanvasProps> = ({
@@ -54,9 +81,11 @@ const Canvas: React.FC<CanvasProps> = ({
   onComponentMove,
   onComponentUpdate,
   onComponentDelete,
+  onComponentMoveWithoutHistory,
 }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+  const [initialPosition, setInitialPosition] = useState({ x: 0, y: 0 });
   const canvasRef = useRef<HTMLDivElement>(null);
 
   // Handle mouse down on component
@@ -82,6 +111,8 @@ const Canvas: React.FC<CanvasProps> = ({
       x: e.clientX - rect.left - component.position.x,
       y: e.clientY - rect.top - component.position.y,
     });
+    // Store initial position to track if component actually moved
+    setInitialPosition({ x: component.position.x, y: component.position.y });
 
     // Prevent text selection during drag
     e.preventDefault();
@@ -89,7 +120,8 @@ const Canvas: React.FC<CanvasProps> = ({
 
   // Handle mouse move for dragging
   const handleMouseMove = (e: MouseEvent) => {
-    if (!isDragging || !selectedComponent || !onComponentMove) return;
+    if (!isDragging || !selectedComponent || !onComponentMoveWithoutHistory)
+      return;
 
     const rect = canvasRef.current?.getBoundingClientRect();
     if (!rect) return;
@@ -101,11 +133,31 @@ const Canvas: React.FC<CanvasProps> = ({
     const constrainedX = Math.max(0, Math.min(newX, rect.width - 100));
     const constrainedY = Math.max(0, Math.min(newY, rect.height - 100));
 
-    onComponentMove(selectedComponent.id, { x: constrainedX, y: constrainedY });
+    // Update position without history during drag
+    onComponentMoveWithoutHistory(selectedComponent.id, {
+      x: constrainedX,
+      y: constrainedY,
+    });
   };
 
   // Handle mouse up to end dragging
   const handleMouseUp = () => {
+    if (isDragging && selectedComponent) {
+      // Only add to history if the component actually moved
+      const currentComponent = canvasComponents.find(
+        (comp) => comp.id === selectedComponent.id
+      );
+      if (
+        currentComponent &&
+        (currentComponent.position.x !== initialPosition.x ||
+          currentComponent.position.y !== initialPosition.y)
+      ) {
+        // Component moved, trigger history update
+        if (onComponentMove) {
+          onComponentMove(selectedComponent.id, currentComponent.position);
+        }
+      }
+    }
     setIsDragging(false);
   };
 
@@ -197,7 +249,13 @@ const Canvas: React.FC<CanvasProps> = ({
                   onComponentUpdate(componentId, { text: newText });
                 }
               }}
+              onStyleChange={(componentId, styles) => {
+                if (onComponentUpdate) {
+                  onComponentUpdate(componentId, styles);
+                }
+              }}
               onDelete={onComponentDelete}
+              zIndex={component.zIndex}
             />
           );
 
@@ -217,7 +275,13 @@ const Canvas: React.FC<CanvasProps> = ({
                   onComponentUpdate(componentId, { text: newText });
                 }
               }}
+              onStyleChange={(componentId, styles) => {
+                if (onComponentUpdate) {
+                  onComponentUpdate(componentId, styles);
+                }
+              }}
               onDelete={onComponentDelete}
+              zIndex={component.zIndex}
             />
           );
 
@@ -232,6 +296,7 @@ const Canvas: React.FC<CanvasProps> = ({
               isDragging={isDragging && isSelected}
               onSelect={handleComponentSelect}
               onMouseDown={handleComponentMouseDown}
+              zIndex={component.zIndex}
             />
           );
 
@@ -246,6 +311,52 @@ const Canvas: React.FC<CanvasProps> = ({
               isDragging={isDragging && isSelected}
               onSelect={handleComponentSelect}
               onMouseDown={handleComponentMouseDown}
+              zIndex={component.zIndex}
+            />
+          );
+
+        case 'container':
+          return (
+            <ContainerComponent
+              key={component.id}
+              id={component.id}
+              position={component.position}
+              customProps={component.props}
+              isSelected={isSelected}
+              isDragging={isDragging && isSelected}
+              onSelect={handleComponentSelect}
+              onMouseDown={handleComponentMouseDown}
+              zIndex={component.zIndex}
+            />
+          );
+
+        case 'row':
+          return (
+            <RowComponent
+              key={component.id}
+              id={component.id}
+              position={component.position}
+              customProps={component.props}
+              isSelected={isSelected}
+              isDragging={isDragging && isSelected}
+              onSelect={handleComponentSelect}
+              onMouseDown={handleComponentMouseDown}
+              zIndex={component.zIndex}
+            />
+          );
+
+        case 'column':
+          return (
+            <ColumnComponent
+              key={component.id}
+              id={component.id}
+              position={component.position}
+              customProps={component.props}
+              isSelected={isSelected}
+              isDragging={isDragging && isSelected}
+              onSelect={handleComponentSelect}
+              onMouseDown={handleComponentMouseDown}
+              zIndex={component.zIndex}
             />
           );
 
@@ -279,19 +390,15 @@ const Canvas: React.FC<CanvasProps> = ({
     return (
       <div key={component.id} className='relative'>
         {componentContent}
-
         {/* Delete Button - positioned at top-right of component */}
         <button
           onClick={(e) => handleDeleteClick(e, component.id)}
-          className={`absolute z-10 w-6 h-6 cursor-pointer ${
-            component.type === 'button' ? '-ml-2 -mt-1' : 'ml-8 -mt-1'
-          } bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center shadow-lg transition-all duration-200 ${
+          className={`absolute z-10 w-5 h-5 cursor-pointer bg-red-500 hover:bg-red-600 z-200 text-white rounded-full flex items-center justify-center shadow-lg transition-all duration-200 ${
             isSelected ? 'opacity-100' : 'opacity-0 hover:opacity-100'
           }`}
           style={{
-            position: 'absolute',
-            top: component.position.y - 8,
-            left: component.position.x + 100 - 8,
+            top: component.position.y - 12,
+            left: component.position.x - 10,
           }}
           title='Delete component (or press Delete key)'
         >
@@ -316,7 +423,8 @@ const Canvas: React.FC<CanvasProps> = ({
           }} // Deselect when clicking canvas
         >
           {/* Drop zone indicator */}
-          <div className='absolute top-4 left-4 text-xs text-slate-400 dark:text-slate-500 bg-white dark:bg-slate-800 px-2 py-1 rounded border border-slate-200 dark:border-slate-700 z-10'>
+          <div className='absolute top-4 left-4 text-xs text-slate-400 dark:text-slate-500 bg-white dark:bg-slate-800 px-2 py-1 rounded border border-slate-200 dark:border-slate-700 z-10 flex items-center gap-2'>
+            <Target className='w-3 h-3' />
             Drop Zone
           </div>
 
@@ -325,7 +433,7 @@ const Canvas: React.FC<CanvasProps> = ({
             <div className='absolute inset-0 flex items-center justify-center'>
               <div className='text-center'>
                 <div className='text-6xl text-slate-300 dark:text-slate-600 mb-4'>
-                  🎨
+                  <Palette className='w-24 h-24 mx-auto' />
                 </div>
                 <h3 className='text-xl font-medium text-slate-600 dark:text-slate-400 mb-2'>
                   Canvas Area
@@ -346,7 +454,8 @@ const Canvas: React.FC<CanvasProps> = ({
           {/* Drag instruction overlay */}
           {isDragging && (
             <div className='absolute inset-0 pointer-events-none flex items-center justify-center'>
-              <div className='bg-blue-500 text-white px-4 py-2 rounded-lg shadow-lg'>
+              <div className='bg-blue-500 text-white px-4 py-2 rounded-lg shadow-lg flex items-center gap-2'>
+                <Move className='w-4 h-4' />
                 <span className='text-sm font-medium'>
                   Dragging component...
                 </span>

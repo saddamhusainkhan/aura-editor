@@ -23,6 +23,8 @@ interface CanvasComponent {
     padding?: number;
     backgroundColor?: string;
     textColor?: string;
+    fontStyle?: string;
+    textDecoration?: string;
     [key: string]: string | number | undefined;
   };
 }
@@ -61,16 +63,26 @@ const PreviewModal: React.FC<PreviewModalProps> = ({
         case 'text':
           return `<div style="${baseStyles} font-size: ${
             component.props.fontSize || 16
-          }px; font-weight: ${component.props.fontWeight || 'normal'}; color: ${
-            component.props.color
-          };">
+          }px; font-weight: ${
+            component.props.fontWeight || 'normal'
+          }; font-style: ${
+            component.props.fontStyle || 'normal'
+          }; text-decoration: ${
+            component.props.textDecoration || 'none'
+          }; color: ${component.props.color};">
             ${component.props.text || 'Default Text'}
           </div>`;
 
         case 'textarea':
           return `<textarea style="${baseStyles} font-size: ${
             component.props.fontSize || 14
-          }px; color: ${component.props.color}; text-align: ${
+          }px; font-weight: ${
+            component.props.fontWeight || 'normal'
+          }; font-style: ${
+            component.props.fontStyle || 'normal'
+          }; text-decoration: ${
+            component.props.textDecoration || 'none'
+          }; color: ${component.props.color}; text-align: ${
             component.props.textAlign || 'left'
           }; border: 1px solid #ccc; padding: 8px; resize: none; background: white;" readonly>
             ${component.props.text || ''}
@@ -92,10 +104,75 @@ const PreviewModal: React.FC<PreviewModalProps> = ({
               component.props.width || 120
             }px; height: ${component.props.height || 120}px; border-radius: ${
               component.props.borderRadius || 0
-            }px; background: #f1f5f9; border: 1px solid #cbd5e1; display: flex; align-items: center; justify-content: center; font-size: 24px;">
-              🖼️
+            }px; background: #f1f5f9; border: 1px solid #cbd5e1; display: flex; align-items: center; justify-content: center; font-size: 24px; color: #64748b;">
+              IMG
             </div>`;
           }
+
+        case 'container':
+          return `<div style="${baseStyles} width: ${
+            component.props.width || 400
+          }px; height: ${component.props.height || 300}px; max-width: ${
+            component.props.maxWidth || 1200
+          }px; padding: ${component.props.padding || 16}px; background-color: ${
+            component.props.backgroundColor || '#f8fafc'
+          }; border: ${component.props.borderWidth || 1}px solid ${
+            component.props.borderColor || '#e2e8f0'
+          }; border-radius: ${
+            component.props.borderRadius || 8
+          }px; position: relative; overflow: hidden;">
+            <div style="display: flex; align-items: center; justify-content: center; height: 100%; color: #64748b; font-size: 14px;">
+              Container
+            </div>
+          </div>`;
+
+        case 'row':
+          return `<div style="${baseStyles} width: ${
+            component.props.width || 600
+          }px; height: ${component.props.height || 100}px; padding: ${
+            component.props.padding || 16
+          }px; background-color: ${
+            component.props.backgroundColor || '#f0f9ff'
+          }; border: ${component.props.borderWidth || 1}px solid ${
+            component.props.borderColor || '#0ea5e9'
+          }; border-radius: ${
+            component.props.borderRadius || 6
+          }px; display: flex; flex-direction: row; gap: ${
+            component.props.gap || 16
+          }px; justify-content: ${
+            component.props.justifyContent || 'flex-start'
+          }; align-items: ${
+            component.props.alignItems || 'center'
+          }; position: relative; overflow: hidden;">
+            <div style="display: flex; align-items: center; justify-content: center; height: 100%; color: #0ea5e9; font-size: 14px;">
+              Row
+            </div>
+          </div>`;
+
+        case 'column':
+          const gridSpan = component.props.gridSpan || 6;
+          const gridWidth = (gridSpan / 12) * 100;
+          return `<div style="${baseStyles} width: ${
+            component.props.width || 200
+          }px; height: ${component.props.height || 150}px; padding: ${
+            component.props.padding || 16
+          }px; background-color: ${
+            component.props.backgroundColor || '#fdf2f8'
+          }; border: ${component.props.borderWidth || 1}px solid ${
+            component.props.borderColor || '#ec4899'
+          }; border-radius: ${
+            component.props.borderRadius || 6
+          }px; display: flex; flex-direction: column; gap: ${
+            component.props.gap || 16
+          }px; justify-content: ${
+            component.props.justifyContent || 'flex-start'
+          }; align-items: ${
+            component.props.alignItems || 'flex-start'
+          }; position: relative; overflow: hidden;">
+            <div style="display: flex; align-items: center; justify-content: center; height: 100%; color: #ec4899; font-size: 14px;">
+              Column ({gridSpan}/12 = {gridWidth.toFixed(1)}%)
+            </div>
+          </div>`;
 
         case 'button':
           const buttonStyles = `

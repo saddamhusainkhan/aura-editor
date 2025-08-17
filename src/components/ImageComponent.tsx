@@ -1,4 +1,5 @@
 import React from 'react';
+import { Image } from 'lucide-react';
 
 interface ImageComponentProps {
   id: string;
@@ -6,16 +7,21 @@ interface ImageComponentProps {
   customProps: {
     src?: string;
     alt?: string;
+    opacity: number;
     objectFit?: string;
-    borderRadius?: number;
+    borderRadiusTop?: number;
+    borderRadiusRight?: number;
+    borderRadiusBottom?: number;
+    borderRadiusLeft?: number;
     height?: number;
     width?: number;
-    opacity: number;
+    [key: string]: string | number | undefined;
   };
   isSelected: boolean;
   isDragging: boolean;
   onSelect: (componentId: string) => void;
   onMouseDown: (e: React.MouseEvent, componentId: string) => void;
+  zIndex: number;
 }
 
 const ImageComponent: React.FC<ImageComponentProps> = ({
@@ -26,6 +32,7 @@ const ImageComponent: React.FC<ImageComponentProps> = ({
   isDragging,
   onSelect,
   onMouseDown,
+  zIndex,
 }) => {
   const handleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -48,12 +55,17 @@ const ImageComponent: React.FC<ImageComponentProps> = ({
     left: position.x,
     top: position.y,
     opacity: customProps.opacity / 100,
+    zIndex: zIndex,
   };
 
   const imageStyles = {
     width: customProps.width || 120,
     height: customProps.height || 120,
-    borderRadius: customProps.borderRadius || 0,
+    borderRadius: `${customProps.borderRadiusTop || 0}px ${
+      customProps.borderRadiusRight || 0
+    }px ${customProps.borderRadiusBottom || 0}px ${
+      customProps.borderRadiusLeft || 0
+    }px`,
     objectFit:
       (customProps.objectFit as
         | 'cover'
@@ -82,7 +94,7 @@ const ImageComponent: React.FC<ImageComponentProps> = ({
           className='bg-slate-100 dark:bg-slate-600 border border-slate-200 dark:border-slate-500 flex items-center justify-center'
           style={imageStyles}
         >
-          <span className='text-2xl'>🖼️</span>
+          <Image className='h-8 w-8 text-slate-500' />
         </div>
       )}
     </div>

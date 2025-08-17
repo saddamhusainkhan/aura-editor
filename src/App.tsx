@@ -106,6 +106,7 @@ function App() {
       id: Date.now().toString(),
       type: componentType,
       position: { x: 50, y: 50 },
+      zIndex: 1,
       props: {
         text:
           componentType === 'text'
@@ -124,6 +125,14 @@ function App() {
             ? 14
             : undefined,
         fontWeight: componentType === 'text' ? 'normal' : undefined,
+        fontStyle:
+          componentType === 'text' || componentType === 'textarea'
+            ? 'normal'
+            : undefined,
+        textDecoration:
+          componentType === 'text' || componentType === 'textarea'
+            ? 'none'
+            : undefined,
         textAlign: componentType === 'textarea' ? 'left' : undefined,
         src: componentType === 'image' ? undefined : undefined,
         alt: componentType === 'image' ? 'Image' : undefined,
@@ -136,8 +145,36 @@ function App() {
             : componentType === 'button'
             ? 6
             : undefined,
+        borderRadiusTop: componentType === 'button' ? 6 : 0,
+        borderRadiusRight: componentType === 'button' ? 6 : 0,
+        borderRadiusBottom: componentType === 'button' ? 6 : 0,
+        borderRadiusLeft: componentType === 'button' ? 6 : 0,
         url: componentType === 'button' ? undefined : undefined,
         padding: componentType === 'button' ? 8 : undefined,
+        paddingTop:
+          componentType === 'button'
+            ? 8
+            : componentType === 'text' || componentType === 'textarea'
+            ? 8
+            : 0,
+        paddingRight:
+          componentType === 'button'
+            ? 8
+            : componentType === 'text' || componentType === 'textarea'
+            ? 12
+            : 0,
+        paddingBottom:
+          componentType === 'button'
+            ? 8
+            : componentType === 'text' || componentType === 'textarea'
+            ? 8
+            : 0,
+        paddingLeft:
+          componentType === 'button'
+            ? 8
+            : componentType === 'text' || componentType === 'textarea'
+            ? 12
+            : 0,
         backgroundColor: componentType === 'button' ? '#3b82f6' : undefined,
         textColor: componentType === 'button' ? '#ffffff' : undefined,
       },
@@ -155,6 +192,7 @@ function App() {
       id: Date.now().toString(),
       type: componentType,
       position: { x, y },
+      zIndex: 1,
       props: {
         text:
           componentType === 'text'
@@ -173,22 +211,197 @@ function App() {
             ? 14
             : undefined,
         fontWeight: componentType === 'text' ? 'normal' : undefined,
+        fontStyle:
+          componentType === 'text' || componentType === 'textarea'
+            ? 'normal'
+            : undefined,
+        textDecoration:
+          componentType === 'text' || componentType === 'textarea'
+            ? 'none'
+            : undefined,
         textAlign: componentType === 'textarea' ? 'left' : undefined,
         src: componentType === 'image' ? undefined : undefined,
         alt: componentType === 'image' ? 'Image' : undefined,
-        width: componentType === 'image' ? 120 : undefined,
-        height: componentType === 'image' ? 120 : undefined,
+        width:
+          componentType === 'image'
+            ? 120
+            : componentType === 'container'
+            ? 400
+            : componentType === 'row'
+            ? 600
+            : componentType === 'column'
+            ? 200
+            : undefined,
+        height:
+          componentType === 'image'
+            ? 120
+            : componentType === 'container'
+            ? 300
+            : componentType === 'row'
+            ? 100
+            : componentType === 'column'
+            ? 150
+            : undefined,
         objectFit: componentType === 'image' ? 'cover' : undefined,
         borderRadius:
           componentType === 'image'
             ? 0
             : componentType === 'button'
             ? 6
+            : componentType === 'container'
+            ? 8
+            : componentType === 'row'
+            ? 6
+            : componentType === 'column'
+            ? 6
             : undefined,
+        borderRadiusTop:
+          componentType === 'button'
+            ? 6
+            : componentType === 'container'
+            ? 8
+            : componentType === 'row'
+            ? 6
+            : componentType === 'column'
+            ? 6
+            : 0,
+        borderRadiusRight:
+          componentType === 'button'
+            ? 6
+            : componentType === 'container'
+            ? 8
+            : componentType === 'row'
+            ? 6
+            : componentType === 'column'
+            ? 6
+            : 0,
+        borderRadiusBottom:
+          componentType === 'button'
+            ? 6
+            : componentType === 'container'
+            ? 8
+            : componentType === 'row'
+            ? 6
+            : componentType === 'column'
+            ? 6
+            : 0,
+        borderRadiusLeft:
+          componentType === 'button'
+            ? 6
+            : componentType === 'container'
+            ? 8
+            : componentType === 'row'
+            ? 6
+            : componentType === 'column'
+            ? 6
+            : 0,
         url: componentType === 'button' ? undefined : undefined,
-        padding: componentType === 'button' ? 8 : undefined,
-        backgroundColor: componentType === 'button' ? '#3b82f6' : undefined,
+        padding:
+          componentType === 'button'
+            ? 8
+            : componentType === 'container'
+            ? 16
+            : componentType === 'row'
+            ? 16
+            : componentType === 'column'
+            ? 16
+            : undefined,
+        paddingTop:
+          componentType === 'button'
+            ? 8
+            : componentType === 'text' || componentType === 'textarea'
+            ? 8
+            : componentType === 'container'
+            ? 16
+            : componentType === 'row'
+            ? 16
+            : componentType === 'column'
+            ? 16
+            : 0,
+        paddingRight:
+          componentType === 'button'
+            ? 8
+            : componentType === 'text' || componentType === 'textarea'
+            ? 12
+            : componentType === 'container'
+            ? 16
+            : componentType === 'row'
+            ? 16
+            : componentType === 'column'
+            ? 16
+            : 0,
+        paddingBottom:
+          componentType === 'button'
+            ? 8
+            : componentType === 'text' || componentType === 'textarea'
+            ? 8
+            : componentType === 'container'
+            ? 16
+            : componentType === 'row'
+            ? 16
+            : componentType === 'column'
+            ? 16
+            : 0,
+        paddingLeft:
+          componentType === 'button'
+            ? 8
+            : componentType === 'text' || componentType === 'textarea'
+            ? 12
+            : componentType === 'container'
+            ? 16
+            : componentType === 'row'
+            ? 16
+            : componentType === 'column'
+            ? 16
+            : 0,
+        backgroundColor:
+          componentType === 'button'
+            ? '#3b82f6'
+            : componentType === 'container'
+            ? '#f8fafc'
+            : componentType === 'row'
+            ? '#f0f9ff'
+            : componentType === 'column'
+            ? '#fdf2f8'
+            : undefined,
         textColor: componentType === 'button' ? '#ffffff' : undefined,
+        // Layout-specific properties
+        maxWidth: componentType === 'container' ? 1200 : undefined,
+        gridSpan: componentType === 'column' ? 6 : undefined,
+        gap:
+          componentType === 'row'
+            ? 16
+            : componentType === 'column'
+            ? 16
+            : undefined,
+        justifyContent:
+          componentType === 'row'
+            ? 'flex-start'
+            : componentType === 'column'
+            ? 'flex-start'
+            : undefined,
+        alignItems:
+          componentType === 'row'
+            ? 'center'
+            : componentType === 'column'
+            ? 'flex-start'
+            : undefined,
+        borderColor:
+          componentType === 'container'
+            ? '#e2e8f0'
+            : componentType === 'row'
+            ? '#0ea5e9'
+            : componentType === 'column'
+            ? '#ec4899'
+            : undefined,
+        borderWidth:
+          componentType === 'container'
+            ? 1
+            : componentType === 'row'
+            ? 1
+            : componentType === 'column'
+            ? 1
+            : undefined,
       },
     };
 
@@ -215,6 +428,17 @@ function App() {
     );
   };
 
+  const handleComponentMoveWithoutHistory = (
+    componentId: string,
+    newPosition: { x: number; y: number }
+  ) => {
+    setCanvasComponents(
+      canvasComponents.map((comp) =>
+        comp.id === componentId ? { ...comp, position: newPosition } : comp
+      )
+    );
+  };
+
   const handleComponentUpdate = (
     componentId: string,
     updates: Partial<CanvasComponent['props']>
@@ -226,6 +450,15 @@ function App() {
           : comp
       ),
       'Component updated'
+    );
+  };
+
+  const handleZIndexUpdate = (componentId: string, newZIndex: number) => {
+    updateCanvasWithHistory(
+      canvasComponents.map((comp) =>
+        comp.id === componentId ? { ...comp, zIndex: newZIndex } : comp
+      ),
+      'Z-index updated'
     );
   };
 
@@ -412,6 +645,8 @@ function App() {
             onComponentMove={handleComponentMove}
             onComponentUpdate={handleComponentUpdate}
             onComponentDelete={handleComponentDelete}
+            onComponentMoveWithoutHistory={handleComponentMoveWithoutHistory}
+            onZIndexUpdate={handleZIndexUpdate}
           />
         </div>
 
@@ -421,6 +656,7 @@ function App() {
             selectedComponent={selectedComponent}
             canvasComponents={canvasComponents}
             onComponentUpdate={handleComponentUpdate}
+            onZIndexUpdate={handleZIndexUpdate}
           />
         </div>
       </div>

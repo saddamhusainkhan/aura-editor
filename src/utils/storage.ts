@@ -4,23 +4,42 @@ export interface CanvasComponent {
   id: string;
   type: string;
   position: { x: number; y: number };
+  zIndex: number;
   props: {
     text?: string;
     color: string;
     opacity: number;
     fontSize?: number;
     fontWeight?: string;
+    fontStyle?: string;
+    textDecoration?: string;
     textAlign?: string;
     src?: string;
     alt?: string;
     objectFit?: string;
     borderRadius?: number;
+    borderRadiusTop?: number;
+    borderRadiusRight?: number;
+    borderRadiusBottom?: number;
+    borderRadiusLeft?: number;
     height?: number;
     width?: number;
     url?: string;
     padding?: number;
+    paddingTop?: number;
+    paddingRight?: number;
+    paddingBottom?: number;
+    paddingLeft?: number;
     backgroundColor?: string;
     textColor?: string;
+    // Layout-specific properties
+    maxWidth?: number;
+    gridSpan?: number;
+    gap?: number;
+    justifyContent?: string;
+    alignItems?: string;
+    borderColor?: string;
+    borderWidth?: number;
     [key: string]: string | number | undefined;
   };
 }
