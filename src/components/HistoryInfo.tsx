@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Info } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
@@ -18,10 +18,34 @@ const HistoryInfo: React.FC<HistoryInfoProps> = ({
   lastAction,
 }) => {
   const [isOpen, setIsOpen] = React.useState(false);
+  const tooltipRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        tooltipRef.current &&
+        !tooltipRef.current.contains(event.target as Node) &&
+        buttonRef.current &&
+        !buttonRef.current.contains(event.target as Node)
+      ) {
+        setIsOpen(false);
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isOpen]);
 
   return (
     <div className="relative">
       <Button
+        ref={buttonRef}
         variant="ghost"
         size="sm"
         className="h-6 w-6 p-0 text-slate-400 hover:text-slate-600"
@@ -32,7 +56,10 @@ const HistoryInfo: React.FC<HistoryInfoProps> = ({
       </Button>
 
       {isOpen && (
-        <div className="absolute bottom-full left-0 mb-2 w-64 bg-white dark:bg-slate-800 rounded-lg shadow-lg border border-slate-200 dark:border-slate-700 p-3 z-10">
+        <div 
+          ref={tooltipRef}
+          className="absolute bottom-full left-0 mb-2 w-64 bg-white dark:bg-slate-800 rounded-lg shadow-lg border border-slate-200 dark:border-slate-700 p-3 z-10"
+        >
           <div className="text-xs space-y-2">
             <div className="flex justify-between">
               <span className="text-slate-600 dark:text-slate-400">History Stack:</span>
