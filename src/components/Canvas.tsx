@@ -1,4 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
+import TextComponent from './TextComponent';
+import TextAreaComponent from './TextAreaComponent';
 
 interface CanvasComponent {
   id: string;
@@ -10,6 +12,7 @@ interface CanvasComponent {
     opacity: number;
     fontSize?: number;
     fontWeight?: string;
+    textAlign?: string;
     [key: string]: string | number | undefined;
   };
 }
@@ -122,66 +125,58 @@ const Canvas: React.FC<CanvasProps> = ({
 
   const renderComponent = (component: CanvasComponent) => {
     const isSelected = selectedComponent?.id === component.id;
-    const baseClasses = `absolute cursor-pointer select-none transition-all ${
-      isSelected
-        ? 'ring-2 ring-blue-500 ring-offset-2'
-        : 'hover:ring-1 hover:ring-slate-300 dark:hover:ring-slate-600'
-    }`;
 
-    // Add dragging cursor when component is being dragged
-    const cursorClass =
-      isDragging && isSelected ? 'cursor-grabbing' : 'cursor-grab';
+    const handleComponentSelect = (componentId: string) => {
+      handleComponentClick({} as React.MouseEvent, componentId);
+    };
+
+    const handleComponentMouseDown = (
+      e: React.MouseEvent,
+      componentId: string
+    ) => {
+      handleMouseDown(e, componentId);
+    };
 
     switch (component.type) {
       case 'text':
         return (
-          <div
+          <TextComponent
             key={component.id}
-            className={`${baseClasses} ${cursorClass} px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded shadow-sm`}
-            style={{
-              left: component.position.x,
-              top: component.position.y,
-              color: component.props.color,
-              opacity: component.props.opacity / 100,
-              fontSize: component.props.fontSize || 16,
-              fontWeight: component.props.fontWeight || 'normal',
-            }}
-            onMouseDown={(e) => handleMouseDown(e, component.id)}
-            onClick={(e) => handleComponentClick(e, component.id)}
-          >
-            <span className='text-sm font-medium'>
-              {component.props.text || 'Default Text'}
-            </span>
-          </div>
+            id={component.id}
+            position={component.position}
+            customProps={component.props}
+            isSelected={isSelected}
+            isDragging={isDragging && isSelected}
+            onSelect={handleComponentSelect}
+            onMouseDown={handleComponentMouseDown}
+          />
         );
 
       case 'textarea':
         return (
-          <div
+          <TextAreaComponent
             key={component.id}
-            className={`${baseClasses} ${cursorClass} px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded shadow-sm`}
-            style={{
-              left: component.position.x,
-              top: component.position.y,
-              color: component.props.color,
-              opacity: component.props.opacity / 100,
-            }}
-            onMouseDown={(e) => handleMouseDown(e, component.id)}
-            onClick={(e) => handleComponentClick(e, component.id)}
-          >
-            <div className='w-32 h-20 bg-slate-50 dark:bg-slate-700 rounded border border-slate-200 dark:border-slate-600 flex items-center justify-center'>
-              <span className='text-xs text-slate-500 dark:text-slate-400'>
-                TextArea
-              </span>
-            </div>
-          </div>
+            id={component.id}
+            position={component.position}
+            customProps={component.props}
+            isSelected={isSelected}
+            isDragging={isDragging && isSelected}
+            onSelect={handleComponentSelect}
+            onMouseDown={handleComponentMouseDown}
+          />
         );
 
       case 'image':
         return (
           <div
             key={component.id}
-            className={`${baseClasses} ${cursorClass} px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded shadow-sm`}
+            className={`absolute cursor-pointer select-none transition-all ${
+              isSelected
+                ? 'ring-2 ring-blue-500 ring-offset-2'
+                : 'hover:ring-1 hover:ring-slate-300 dark:hover:ring-slate-600'
+            } ${
+              isDragging && isSelected ? 'cursor-grabbing' : 'cursor-grab'
+            } px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded shadow-sm`}
             style={{
               left: component.position.x,
               top: component.position.y,
@@ -200,7 +195,13 @@ const Canvas: React.FC<CanvasProps> = ({
         return (
           <div
             key={component.id}
-            className={`${baseClasses} ${cursorClass} px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded shadow-sm`}
+            className={`absolute cursor-pointer select-none transition-all ${
+              isSelected
+                ? 'ring-2 ring-blue-500 ring-offset-2'
+                : 'hover:ring-1 hover:ring-slate-300 dark:hover:ring-slate-600'
+            } ${
+              isDragging && isSelected ? 'cursor-grabbing' : 'cursor-grab'
+            } px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded shadow-sm`}
             style={{
               left: component.position.x,
               top: component.position.y,
@@ -224,7 +225,13 @@ const Canvas: React.FC<CanvasProps> = ({
         return (
           <div
             key={component.id}
-            className={`${baseClasses} ${cursorClass} px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded shadow-sm`}
+            className={`absolute cursor-pointer select-none transition-all ${
+              isSelected
+                ? 'ring-2 ring-blue-500 ring-offset-2'
+                : 'hover:ring-1 hover:ring-slate-300 dark:hover:ring-slate-600'
+            } ${
+              isDragging && isSelected ? 'cursor-grabbing' : 'cursor-grab'
+            } px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded shadow-sm`}
             style={{
               left: component.position.x,
               top: component.position.y,

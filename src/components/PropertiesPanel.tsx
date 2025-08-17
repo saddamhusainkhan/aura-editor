@@ -23,6 +23,7 @@ interface CanvasComponent {
     opacity: number;
     fontSize?: number;
     fontWeight?: string;
+    textAlign?: string;
     [key: string]: any;
   };
 }
@@ -30,7 +31,10 @@ interface CanvasComponent {
 interface PropertiesPanelProps {
   selectedComponent: CanvasComponent | null;
   canvasComponents: CanvasComponent[];
-  onComponentUpdate: (componentId: string, updates: Partial<CanvasComponent['props']>) => void;
+  onComponentUpdate: (
+    componentId: string,
+    updates: Partial<CanvasComponent['props']>
+  ) => void;
 }
 
 const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
@@ -64,7 +68,9 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
     }
   };
 
-  const handleFontSizeInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFontSizeInputChange = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
     if (selectedComponent) {
       const fontSizeValue = parseInt(e.target.value) || 16;
       onComponentUpdate(selectedComponent.id, { fontSize: fontSizeValue });
@@ -74,6 +80,12 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
   const handleFontWeightChange = (newWeight: string) => {
     if (selectedComponent) {
       onComponentUpdate(selectedComponent.id, { fontWeight: newWeight });
+    }
+  };
+
+  const handleTextAlignChange = (align: string) => {
+    if (selectedComponent) {
+      onComponentUpdate(selectedComponent.id, { textAlign: align });
     }
   };
 
@@ -118,8 +130,7 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
               No Component Selected
             </h3>
             <p className='text-sm text-slate-500 dark:text-slate-500'>
-              Select a component from the canvas to view and edit its
-              properties
+              Select a component from the canvas to view and edit its properties
             </p>
           </div>
         </div>
@@ -193,7 +204,9 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
               <CardContent className='space-y-3'>
                 <div className='space-y-2'>
                   <div className='flex justify-between text-xs'>
-                    <span>Font Size: {selectedComponent.props.fontSize || 16}px</span>
+                    <span>
+                      Font Size: {selectedComponent.props.fontSize || 16}px
+                    </span>
                   </div>
                   <Slider
                     min={8}
@@ -253,6 +266,104 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                         {weight.label}
                       </Button>
                     ))}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Font Size Control for TextArea Components */}
+          {selectedComponent.type === 'textarea' && (
+            <Card className='shadow-sm'>
+              <CardHeader className='pb-3'>
+                <CardTitle className='text-sm'>Font Size</CardTitle>
+              </CardHeader>
+              <CardContent className='space-y-3'>
+                <div className='space-y-2'>
+                  <div className='flex justify-between text-xs'>
+                    <span>
+                      Font Size: {selectedComponent.props.fontSize || 14}px
+                    </span>
+                  </div>
+                  <Slider
+                    min={8}
+                    max={24}
+                    value={selectedComponent.props.fontSize || 14}
+                    onChange={handleFontSizeChange}
+                    trackStyle={{ backgroundColor: '#3b82f6', height: 4 }}
+                    handleStyle={{
+                      borderColor: '#3b82f6',
+                      height: 16,
+                      width: 16,
+                      marginTop: -6,
+                    }}
+                    railStyle={{ backgroundColor: '#e2e8f0', height: 4 }}
+                  />
+                </div>
+                <div className='space-y-2'>
+                  <Label htmlFor='textarea-font-size-input' className='text-xs'>
+                    Font Size (px)
+                  </Label>
+                  <Input
+                    id='textarea-font-size-input'
+                    type='number'
+                    min={8}
+                    max={24}
+                    value={selectedComponent.props.fontSize || 14}
+                    onChange={handleFontSizeInputChange}
+                    className='font-mono text-sm h-8'
+                  />
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Text Alignment Control for TextArea Components */}
+          {selectedComponent.type === 'textarea' && (
+            <Card className='shadow-sm'>
+              <CardHeader className='pb-3'>
+                <CardTitle className='text-sm'>Text Alignment</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className='space-y-2'>
+                  <Label className='text-xs'>Text Alignment</Label>
+                  <div className='grid grid-cols-3 gap-2'>
+                    <Button
+                      variant={
+                        selectedComponent.props.textAlign === 'left'
+                          ? 'default'
+                          : 'outline'
+                      }
+                      size='sm'
+                      className='text-xs h-8'
+                      onClick={() => handleTextAlignChange('left')}
+                    >
+                      Left
+                    </Button>
+                    <Button
+                      variant={
+                        selectedComponent.props.textAlign === 'center'
+                          ? 'default'
+                          : 'outline'
+                      }
+                      size='sm'
+                      className='text-xs h-8'
+                      onClick={() => handleTextAlignChange('center')}
+                    >
+                      Center
+                    </Button>
+                    <Button
+                      variant={
+                        selectedComponent.props.textAlign === 'right'
+                          ? 'default'
+                          : 'outline'
+                      }
+                      size='sm'
+                      className='text-xs h-8'
+                      onClick={() => handleTextAlignChange('right')}
+                    >
+                      Right
+                    </Button>
                   </div>
                 </div>
               </CardContent>
@@ -327,7 +438,9 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                   <div
                     className='h-12 rounded border border-slate-200 dark:border-slate-700'
                     style={{
-                      backgroundColor: `${selectedComponent.props.color}${Math.round(
+                      backgroundColor: `${
+                        selectedComponent.props.color
+                      }${Math.round(
                         (selectedComponent.props.opacity / 100) * 255
                       )
                         .toString(16)
@@ -372,4 +485,4 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
   );
 };
 
-export default PropertiesPanel; 
+export default PropertiesPanel;

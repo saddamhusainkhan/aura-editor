@@ -26,6 +26,7 @@ interface CanvasComponent {
     opacity: number;
     fontSize?: number;
     fontWeight?: string;
+    textAlign?: string;
     [key: string]: string | number | undefined;
   };
 }
@@ -99,8 +100,14 @@ function App() {
         text: componentType === 'text' ? 'Default Text' : undefined,
         color: color,
         opacity: opacity,
-        fontSize: componentType === 'text' ? 16 : undefined,
+        fontSize:
+          componentType === 'text'
+            ? 16
+            : componentType === 'textarea'
+            ? 14
+            : undefined,
         fontWeight: componentType === 'text' ? 'normal' : undefined,
+        textAlign: componentType === 'textarea' ? 'left' : undefined,
       },
     };
 
@@ -117,8 +124,14 @@ function App() {
         text: componentType === 'text' ? 'Default Text' : undefined,
         color: color,
         opacity: opacity,
-        fontSize: componentType === 'text' ? 16 : undefined,
+        fontSize:
+          componentType === 'text'
+            ? 16
+            : componentType === 'textarea'
+            ? 14
+            : undefined,
         fontWeight: componentType === 'text' ? 'normal' : undefined,
+        textAlign: componentType === 'textarea' ? 'left' : undefined,
       },
     };
 
