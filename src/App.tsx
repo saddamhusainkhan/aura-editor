@@ -15,6 +15,10 @@ import { Label } from '@/components/ui/label';
 import Palette from '@/components/Palette';
 import Canvas from '@/components/Canvas';
 import PropertiesPanel from '@/components/PropertiesPanel';
+import PreviewModal from '@/components/PreviewModal';
+import Toast from '@/components/Toast';
+import { generateHTMLString, copyToClipboard } from '@/utils/htmlGenerator';
+import { Eye, Copy, Check } from 'lucide-react';
 
 interface CanvasComponent {
   id: string;
@@ -27,6 +31,16 @@ interface CanvasComponent {
     fontSize?: number;
     fontWeight?: string;
     textAlign?: string;
+    src?: string;
+    alt?: string;
+    objectFit?: string;
+    borderRadius?: number;
+    height?: number;
+    width?: number;
+    url?: string;
+    padding?: number;
+    backgroundColor?: string;
+    textColor?: string;
     [key: string]: string | number | undefined;
   };
 }
@@ -41,6 +55,16 @@ function App() {
   const [saturation, setSaturation] = useState(50);
   const [lightness, setLightness] = useState(50);
   const [opacity, setOpacity] = useState(100);
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const [toast, setToast] = useState<{
+    message: string;
+    type: 'success' | 'error' | 'info';
+    isVisible: boolean;
+  }>({
+    message: '',
+    type: 'info',
+    isVisible: false,
+  });
 
   // Get the currently selected component
   const selectedComponent =
@@ -247,32 +271,94 @@ function App() {
     }
   };
 
+  const handlePreview = () => {
+    setIsPreviewOpen(true);
+  };
+
+  const handleCopyHTML = async () => {
+    const htmlString = generateHTMLString(canvasComponents);
+    const success = await copyToClipboard(htmlString);
+
+    if (success) {
+      setToast({
+        message: 'HTML copied to clipboard successfully!',
+        type: 'success',
+        isVisible: true,
+      });
+    } else {
+      setToast({
+        message: 'Failed to copy HTML to clipboard',
+        type: 'error',
+        isVisible: true,
+      });
+    }
+  };
+
+  const closeToast = () => {
+    setToast((prev) => ({ ...prev, isVisible: false }));
+  };
+
   return (
-    <div className='flex h-screen bg-slate-50 dark:bg-slate-900'>
-      {/* Left Panel - Component Palette (20% width) */}
-      <div className='w-1/5 h-screen border-r border-slate-200 dark:border-slate-700'>
-        <Palette onComponentSelect={handlePaletteComponentSelect} />
+    <div className='flex flex-col h-screen bg-slate-50 dark:bg-slate-900'>
+      {/* Top Toolbar */}
+      <div className='flex justify-between items-center p-4 border-b border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800'>
+        <h1 className='text-2xl font-bold text-slate-900 dark:text-slate-100'>
+          Aura Editor
+        </h1>
+        <div className='flex items-center gap-2'>
+          <Button onClick={handlePreview} className='flex items-center gap-2'>
+            <Eye className='h-4 w-4' /> Preview
+          </Button>
+          <Button onClick={handleCopyHTML} className='flex items-center gap-2'>
+            {toast.isVisible && toast.type === 'success' ? (
+              <Check className='h-4 w-4 text-green-500' />
+            ) : (
+              <Copy className='h-4 w-4' />
+            )}
+            Copy HTML
+          </Button>
+        </div>
       </div>
 
-      {/* Middle Panel - Canvas (60% width) */}
-      <div className='w-3/5 h-screen border-r border-slate-200 dark:border-slate-700'>
-        <Canvas
-          selectedComponent={selectedComponent}
-          canvasComponents={canvasComponents}
-          onComponentDrop={handleComponentDrop}
-          onComponentSelect={handleComponentSelect}
-          onComponentMove={handleComponentMove}
-        />
+      {/* Main Content Area */}
+      <div className='flex flex-1 overflow-hidden'>
+        {/* Left Panel - Component Palette (20% width) */}
+        <div className='w-1/5 h-full border-r border-slate-200 dark:border-slate-700'>
+          <Palette onComponentSelect={handlePaletteComponentSelect} />
+        </div>
+
+        {/* Middle Panel - Canvas (60% width) */}
+        <div className='w-3/5 h-full border-r border-slate-200 dark:border-slate-700'>
+          <Canvas
+            selectedComponent={selectedComponent}
+            canvasComponents={canvasComponents}
+            onComponentDrop={handleComponentDrop}
+            onComponentSelect={handleComponentSelect}
+            onComponentMove={handleComponentMove}
+          />
+        </div>
+
+        {/* Right Panel - Properties (20% width) */}
+        <div className='w-1/5 h-full'>
+          <PropertiesPanel
+            selectedComponent={selectedComponent}
+            canvasComponents={canvasComponents}
+            onComponentUpdate={handleComponentUpdate}
+          />
+        </div>
       </div>
 
-      {/* Right Panel - Properties Panel (20% width) */}
-      <div className='w-1/5 h-screen'>
-        <PropertiesPanel
-          selectedComponent={selectedComponent}
-          canvasComponents={canvasComponents}
-          onComponentUpdate={handleComponentUpdate}
-        />
-      </div>
+      <PreviewModal
+        isOpen={isPreviewOpen}
+        onClose={() => setIsPreviewOpen(false)}
+        canvasComponents={canvasComponents}
+      />
+      <Toast
+        message={toast.message}
+        type={toast.type}
+        isVisible={toast.isVisible}
+        onClose={closeToast}
+      />
     </div>
   );
 }
