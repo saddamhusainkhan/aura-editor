@@ -1,6 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import TextComponent from './TextComponent';
 import TextAreaComponent from './TextAreaComponent';
+import ImageComponent from './ImageComponent';
+import ButtonComponent from './ButtonComponent';
 
 interface CanvasComponent {
   id: string;
@@ -13,6 +15,16 @@ interface CanvasComponent {
     fontSize?: number;
     fontWeight?: string;
     textAlign?: string;
+    src?: string;
+    alt?: string;
+    objectFit?: string;
+    borderRadius?: number;
+    height?: number;
+    width?: number;
+    url?: string;
+    padding?: number;
+    backgroundColor?: string;
+    textColor?: string;
     [key: string]: string | number | undefined;
   };
 }
@@ -168,57 +180,30 @@ const Canvas: React.FC<CanvasProps> = ({
 
       case 'image':
         return (
-          <div
+          <ImageComponent
             key={component.id}
-            className={`absolute cursor-pointer select-none transition-all ${
-              isSelected
-                ? 'ring-2 ring-blue-500 ring-offset-2'
-                : 'hover:ring-1 hover:ring-slate-300 dark:hover:ring-slate-600'
-            } ${
-              isDragging && isSelected ? 'cursor-grabbing' : 'cursor-grab'
-            } px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded shadow-sm`}
-            style={{
-              left: component.position.x,
-              top: component.position.y,
-              opacity: component.props.opacity / 100,
-            }}
-            onMouseDown={(e) => handleMouseDown(e, component.id)}
-            onClick={(e) => handleComponentClick(e, component.id)}
-          >
-            <div className='w-24 h-24 bg-slate-100 dark:bg-slate-600 rounded border border-slate-200 dark:border-slate-500 flex items-center justify-center'>
-              <span className='text-2xl'>🖼️</span>
-            </div>
-          </div>
+            id={component.id}
+            position={component.position}
+            customProps={component.props}
+            isSelected={isSelected}
+            isDragging={isDragging && isSelected}
+            onSelect={handleComponentSelect}
+            onMouseDown={handleComponentMouseDown}
+          />
         );
 
       case 'button':
         return (
-          <div
+          <ButtonComponent
             key={component.id}
-            className={`absolute cursor-pointer select-none transition-all ${
-              isSelected
-                ? 'ring-2 ring-blue-500 ring-offset-2'
-                : 'hover:ring-1 hover:ring-slate-300 dark:hover:ring-slate-600'
-            } ${
-              isDragging && isSelected ? 'cursor-grabbing' : 'cursor-grab'
-            } px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded shadow-sm`}
-            style={{
-              left: component.position.x,
-              top: component.position.y,
-              opacity: component.props.opacity / 100,
-            }}
-            onMouseDown={(e) => handleMouseDown(e, component.id)}
-            onClick={(e) => handleComponentClick(e, component.id)}
-          >
-            <button
-              className='px-4 py-2 rounded bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium transition-colors'
-              style={{
-                backgroundColor: component.props.color,
-              }}
-            >
-              Button
-            </button>
-          </div>
+            id={component.id}
+            position={component.position}
+            customProps={component.props}
+            isSelected={isSelected}
+            isDragging={isDragging && isSelected}
+            onSelect={handleComponentSelect}
+            onMouseDown={handleComponentMouseDown}
+          />
         );
 
       default:

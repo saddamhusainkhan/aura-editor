@@ -24,6 +24,14 @@ interface CanvasComponent {
     fontSize?: number;
     fontWeight?: string;
     textAlign?: string;
+    src?: string;
+    alt?: string;
+    width?: number;
+    height?: number;
+    objectFit?: string;
+    url?: string;
+    padding?: number;
+    borderRadius?: number;
     [key: string]: any;
   };
 }
@@ -86,6 +94,86 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
   const handleTextAlignChange = (align: string) => {
     if (selectedComponent) {
       onComponentUpdate(selectedComponent.id, { textAlign: align });
+    }
+  };
+
+  const handleImageSrcChange = (newSrc: string) => {
+    if (selectedComponent) {
+      onComponentUpdate(selectedComponent.id, { src: newSrc });
+    }
+  };
+
+  const handleImageAltChange = (newAlt: string) => {
+    if (selectedComponent) {
+      onComponentUpdate(selectedComponent.id, { alt: newAlt });
+    }
+  };
+
+  const handleImageWidthChange = (newWidth: number) => {
+    if (selectedComponent) {
+      onComponentUpdate(selectedComponent.id, { width: newWidth });
+    }
+  };
+
+  const handleImageHeightChange = (newHeight: number) => {
+    if (selectedComponent) {
+      onComponentUpdate(selectedComponent.id, { height: newHeight });
+    }
+  };
+
+  const handleImageObjectFitChange = (newFit: string) => {
+    if (selectedComponent) {
+      onComponentUpdate(selectedComponent.id, { objectFit: newFit });
+    }
+  };
+
+  const handleButtonTextChange = (newText: string) => {
+    if (selectedComponent) {
+      onComponentUpdate(selectedComponent.id, { text: newText });
+    }
+  };
+
+  const handleButtonUrlChange = (newUrl: string) => {
+    if (selectedComponent) {
+      onComponentUpdate(selectedComponent.id, { url: newUrl });
+    }
+  };
+
+  const handleButtonFontSizeChange = (newFontSize: number) => {
+    if (selectedComponent) {
+      onComponentUpdate(selectedComponent.id, { fontSize: newFontSize });
+    }
+  };
+
+  const handleButtonPaddingChange = (newPadding: number) => {
+    if (selectedComponent) {
+      onComponentUpdate(selectedComponent.id, { padding: newPadding });
+    }
+  };
+
+  const handleButtonBorderRadiusChange = (newBorderRadius: number) => {
+    if (selectedComponent) {
+      onComponentUpdate(selectedComponent.id, {
+        borderRadius: newBorderRadius,
+      });
+    }
+  };
+
+  const handleButtonBackgroundColorChange = (newColor: string) => {
+    if (selectedComponent) {
+      onComponentUpdate(selectedComponent.id, { backgroundColor: newColor });
+    }
+  };
+
+  const handleButtonTextColorChange = (newColor: string) => {
+    if (selectedComponent) {
+      onComponentUpdate(selectedComponent.id, { textColor: newColor });
+    }
+  };
+
+  const handleImageBorderRadiusChange = (newRadius: number) => {
+    if (selectedComponent) {
+      onComponentUpdate(selectedComponent.id, { borderRadius: newRadius });
     }
   };
 
@@ -370,6 +458,266 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
             </Card>
           )}
 
+          {/* Image Source and Alt Text */}
+          {selectedComponent.type === 'image' && (
+            <Card className='shadow-sm'>
+              <CardHeader className='pb-3'>
+                <CardTitle className='text-sm'>Image Properties</CardTitle>
+              </CardHeader>
+              <CardContent className='space-y-3'>
+                <div className='space-y-2'>
+                  <Label htmlFor='image-src' className='text-xs'>
+                    Image URL
+                  </Label>
+                  <Input
+                    id='image-src'
+                    value={selectedComponent.props.src || ''}
+                    onChange={(e) => handleImageSrcChange(e.target.value)}
+                    placeholder='https://example.com/image.jpg'
+                    className='text-sm h-8'
+                  />
+                </div>
+                <div className='space-y-2'>
+                  <Label htmlFor='image-alt' className='text-xs'>
+                    Alt Text
+                  </Label>
+                  <Input
+                    id='image-alt'
+                    value={selectedComponent.props.alt || ''}
+                    onChange={(e) => handleImageAltChange(e.target.value)}
+                    placeholder='Image description'
+                    className='text-sm h-8'
+                  />
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Image Dimensions */}
+          {selectedComponent.type === 'image' && (
+            <Card className='shadow-sm'>
+              <CardHeader className='pb-3'>
+                <CardTitle className='text-sm'>Dimensions</CardTitle>
+              </CardHeader>
+              <CardContent className='space-y-3'>
+                <div className='grid grid-cols-2 gap-3'>
+                  <div className='space-y-2'>
+                    <Label htmlFor='image-width' className='text-xs'>
+                      Width (px)
+                    </Label>
+                    <Input
+                      id='image-width'
+                      type='number'
+                      min={50}
+                      max={500}
+                      value={selectedComponent.props.width || 120}
+                      onChange={(e) =>
+                        handleImageWidthChange(parseInt(e.target.value) || 120)
+                      }
+                      className='text-sm h-8'
+                    />
+                  </div>
+                  <div className='space-y-2'>
+                    <Label htmlFor='image-height' className='text-xs'>
+                      Height (px)
+                    </Label>
+                    <Input
+                      id='image-height'
+                      type='number'
+                      min={50}
+                      max={500}
+                      value={selectedComponent.props.height || 120}
+                      onChange={(e) =>
+                        handleImageHeightChange(parseInt(e.target.value) || 120)
+                      }
+                      className='text-sm h-8'
+                    />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Image Object Fit */}
+          {selectedComponent.type === 'image' && (
+            <Card className='shadow-sm'>
+              <CardHeader className='pb-3'>
+                <CardTitle className='text-sm'>Object Fit</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className='space-y-2'>
+                  <Label className='text-xs'>Fit Mode</Label>
+                  <div className='grid grid-cols-2 gap-2'>
+                    {['cover', 'contain', 'fill', 'none', 'scale-down'].map(
+                      (fit) => (
+                        <Button
+                          key={fit}
+                          variant={
+                            selectedComponent.props.objectFit === fit
+                              ? 'default'
+                              : 'outline'
+                          }
+                          size='sm'
+                          className='text-xs h-8'
+                          onClick={() => handleImageObjectFitChange(fit)}
+                        >
+                          {fit.charAt(0).toUpperCase() + fit.slice(1)}
+                        </Button>
+                      )
+                    )}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Button Text and URL */}
+          {selectedComponent.type === 'button' && (
+            <Card className='shadow-sm'>
+              <CardHeader className='pb-3'>
+                <CardTitle className='text-sm'>Button Properties</CardTitle>
+              </CardHeader>
+              <CardContent className='space-y-3'>
+                <div className='space-y-2'>
+                  <Label htmlFor='button-text' className='text-xs'>
+                    Button Text
+                  </Label>
+                  <Input
+                    id='button-text'
+                    value={selectedComponent.props.text || ''}
+                    onChange={(e) => handleButtonTextChange(e.target.value)}
+                    placeholder='Button text'
+                    className='text-sm h-8'
+                  />
+                </div>
+                <div className='space-y-2'>
+                  <Label htmlFor='button-url' className='text-xs'>
+                    URL (optional)
+                  </Label>
+                  <Input
+                    id='button-url'
+                    value={selectedComponent.props.url || ''}
+                    onChange={(e) => handleButtonUrlChange(e.target.value)}
+                    placeholder='https://example.com'
+                    className='text-sm h-8'
+                  />
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Button Styling */}
+          {selectedComponent.type === 'button' && (
+            <Card className='shadow-sm'>
+              <CardHeader className='pb-3'>
+                <CardTitle className='text-sm'>Button Styling</CardTitle>
+              </CardHeader>
+              <CardContent className='space-y-3'>
+                <div className='space-y-2'>
+                  <Label htmlFor='button-font-size' className='text-xs'>
+                    Font Size (px)
+                  </Label>
+                  <Input
+                    id='button-font-size'
+                    type='number'
+                    min={8}
+                    max={32}
+                    value={selectedComponent.props.fontSize || 14}
+                    onChange={(e) =>
+                      handleButtonFontSizeChange(parseInt(e.target.value) || 14)
+                    }
+                    className='text-sm h-8'
+                  />
+                </div>
+                <div className='space-y-2'>
+                  <Label htmlFor='button-padding' className='text-xs'>
+                    Padding (px)
+                  </Label>
+                  <Input
+                    id='button-padding'
+                    type='number'
+                    min={4}
+                    max={32}
+                    value={selectedComponent.props.padding || 8}
+                    onChange={(e) =>
+                      handleButtonPaddingChange(parseInt(e.target.value) || 8)
+                    }
+                    className='text-sm h-8'
+                  />
+                </div>
+                <div className='space-y-2'>
+                  <Label htmlFor='button-border-radius' className='text-xs'>
+                    Border Radius (px)
+                  </Label>
+                  <Input
+                    id='button-border-radius'
+                    type='number'
+                    min={0}
+                    max={50}
+                    value={selectedComponent.props.borderRadius || 6}
+                    onChange={(e) =>
+                      handleButtonBorderRadiusChange(
+                        parseInt(e.target.value) || 6
+                      )
+                    }
+                    className='text-sm h-8'
+                  />
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Button Colors */}
+          {selectedComponent.type === 'button' && (
+            <Card className='shadow-sm'>
+              <CardHeader className='pb-3'>
+                <CardTitle className='text-sm'>Button Colors</CardTitle>
+              </CardHeader>
+              <CardContent className='space-y-3'>
+                <div className='space-y-2'>
+                  <Label className='text-xs'>Background Color</Label>
+                  <div className='flex justify-center'>
+                    <HexColorPicker
+                      color={
+                        selectedComponent.props.backgroundColor || '#3b82f6'
+                      }
+                      onChange={(color) =>
+                        handleButtonBackgroundColorChange(color)
+                      }
+                      style={{ width: '100%', height: '80px' }}
+                    />
+                  </div>
+                  <Input
+                    value={selectedComponent.props.backgroundColor || '#3b82f6'}
+                    onChange={(e) =>
+                      handleButtonBackgroundColorChange(e.target.value)
+                    }
+                    className='font-mono text-sm h-8'
+                    placeholder='#3b82f6'
+                  />
+                </div>
+                <div className='space-y-2'>
+                  <Label className='text-xs'>Text Color</Label>
+                  <div className='flex justify-center'>
+                    <HexColorPicker
+                      color={selectedComponent.props.textColor || '#ffffff'}
+                      onChange={(color) => handleButtonTextColorChange(color)}
+                      style={{ width: '100%', height: '80px' }}
+                    />
+                  </div>
+                  <Input
+                    value={selectedComponent.props.textColor || '#ffffff'}
+                    onChange={(e) =>
+                      handleButtonTextColorChange(e.target.value)
+                    }
+                    className='font-mono text-sm h-8'
+                    placeholder='#ffffff'
+                  />
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
           {/* Color Picker */}
           <Card className='shadow-sm'>
             <CardHeader className='pb-3'>
@@ -479,6 +827,62 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
               Reset to Green
             </Button>
           </div>
+
+          {/* Image Border Radius */}
+          {selectedComponent.type === 'image' && (
+            <Card className='shadow-sm'>
+              <CardHeader className='pb-3'>
+                <CardTitle className='text-sm'>Border Radius</CardTitle>
+              </CardHeader>
+              <CardContent className='space-y-3'>
+                <div className='space-y-2'>
+                  <div className='flex justify-between text-xs'>
+                    <span>
+                      Border Radius: {selectedComponent.props.borderRadius || 0}
+                      px
+                    </span>
+                  </div>
+                  <Slider
+                    min={0}
+                    max={50}
+                    value={selectedComponent.props.borderRadius || 0}
+                    onChange={(value) => {
+                      const radiusValue = Array.isArray(value)
+                        ? value[0]
+                        : value;
+                      handleImageBorderRadiusChange(radiusValue);
+                    }}
+                    trackStyle={{ backgroundColor: '#3b82f6', height: 4 }}
+                    handleStyle={{
+                      borderColor: '#3b82f6',
+                      height: 16,
+                      width: 16,
+                      marginTop: -6,
+                    }}
+                    railStyle={{ backgroundColor: '#e2e8f0', height: 4 }}
+                  />
+                </div>
+                <div className='space-y-2'>
+                  <Label htmlFor='image-border-radius' className='text-xs'>
+                    Border Radius (px)
+                  </Label>
+                  <Input
+                    id='image-border-radius'
+                    type='number'
+                    min={0}
+                    max={50}
+                    value={selectedComponent.props.borderRadius || 0}
+                    onChange={(e) =>
+                      handleImageBorderRadiusChange(
+                        parseInt(e.target.value) || 0
+                      )
+                    }
+                    className='text-sm h-8'
+                  />
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </div>
       </div>
     </div>

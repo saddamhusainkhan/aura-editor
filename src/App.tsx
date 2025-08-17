@@ -97,7 +97,12 @@ function App() {
       type: componentType,
       position: { x: 50, y: 50 }, // Default position
       props: {
-        text: componentType === 'text' ? 'Default Text' : undefined,
+        text:
+          componentType === 'text'
+            ? 'Default Text'
+            : componentType === 'button'
+            ? 'Button'
+            : undefined,
         color: color,
         opacity: opacity,
         fontSize:
@@ -105,9 +110,28 @@ function App() {
             ? 16
             : componentType === 'textarea'
             ? 14
+            : componentType === 'button'
+            ? 14
             : undefined,
         fontWeight: componentType === 'text' ? 'normal' : undefined,
         textAlign: componentType === 'textarea' ? 'left' : undefined,
+        // Image properties
+        src: componentType === 'image' ? undefined : undefined,
+        alt: componentType === 'image' ? 'Image' : undefined,
+        width: componentType === 'image' ? 120 : undefined,
+        height: componentType === 'image' ? 120 : undefined,
+        objectFit: componentType === 'image' ? 'cover' : undefined,
+        borderRadius:
+          componentType === 'image'
+            ? 0
+            : componentType === 'button'
+            ? 6
+            : undefined,
+        // Button properties
+        url: componentType === 'button' ? undefined : undefined,
+        padding: componentType === 'button' ? 8 : undefined,
+        backgroundColor: componentType === 'button' ? '#3b82f6' : undefined,
+        textColor: componentType === 'button' ? '#ffffff' : undefined,
       },
     };
 
@@ -121,7 +145,12 @@ function App() {
       type: componentType,
       position: { x, y },
       props: {
-        text: componentType === 'text' ? 'Default Text' : undefined,
+        text:
+          componentType === 'text'
+            ? 'Default Text'
+            : componentType === 'button'
+            ? 'Button'
+            : undefined,
         color: color,
         opacity: opacity,
         fontSize:
@@ -129,9 +158,28 @@ function App() {
             ? 16
             : componentType === 'textarea'
             ? 14
+            : componentType === 'button'
+            ? 14
             : undefined,
         fontWeight: componentType === 'text' ? 'normal' : undefined,
         textAlign: componentType === 'textarea' ? 'left' : undefined,
+        // Image properties
+        src: componentType === 'image' ? undefined : undefined,
+        alt: componentType === 'image' ? 'Image' : undefined,
+        width: componentType === 'image' ? 120 : undefined,
+        height: componentType === 'image' ? 120 : undefined,
+        objectFit: componentType === 'image' ? 'cover' : undefined,
+        borderRadius:
+          componentType === 'image'
+            ? 0
+            : componentType === 'button'
+            ? 6
+            : undefined,
+        // Button properties
+        url: componentType === 'button' ? undefined : undefined,
+        padding: componentType === 'button' ? 8 : undefined,
+        backgroundColor: componentType === 'button' ? '#3b82f6' : undefined,
+        textColor: componentType === 'button' ? '#ffffff' : undefined,
       },
     };
 

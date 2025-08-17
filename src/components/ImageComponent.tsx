@@ -1,14 +1,16 @@
 import React from 'react';
 
-interface TextComponentProps {
+interface ImageComponentProps {
   id: string;
   position: { x: number; y: number };
   customProps: {
-    text?: string;
-    color: string;
+    src?: string;
+    alt?: string;
+    objectFit?: string;
+    borderRadius?: number;
+    height?: number;
+    width?: number;
     opacity: number;
-    fontSize?: number;
-    fontWeight?: string;
   };
   isSelected: boolean;
   isDragging: boolean;
@@ -16,7 +18,7 @@ interface TextComponentProps {
   onMouseDown: (e: React.MouseEvent, componentId: string) => void;
 }
 
-const TextComponent: React.FC<TextComponentProps> = ({
+const ImageComponent: React.FC<ImageComponentProps> = ({
   id,
   position,
   customProps,
@@ -45,10 +47,20 @@ const TextComponent: React.FC<TextComponentProps> = ({
   const inlineStyles = {
     left: position.x,
     top: position.y,
-    color: customProps.color,
     opacity: customProps.opacity / 100,
-    fontSize: customProps.fontSize || 16,
-    fontWeight: customProps.fontWeight || 'normal',
+  };
+
+  const imageStyles = {
+    width: customProps.width || 120,
+    height: customProps.height || 120,
+    borderRadius: customProps.borderRadius || 0,
+    objectFit:
+      (customProps.objectFit as
+        | 'cover'
+        | 'contain'
+        | 'fill'
+        | 'none'
+        | 'scale-down') || 'cover',
   };
 
   return (
@@ -58,11 +70,23 @@ const TextComponent: React.FC<TextComponentProps> = ({
       onMouseDown={handleMouseDown}
       onClick={handleClick}
     >
-      <span className='text-sm font-medium'>
-        {customProps.text || 'Default Text'}
-      </span>
+      {customProps.src ? (
+        <img
+          src={customProps.src}
+          alt={customProps.alt || 'Image'}
+          style={imageStyles}
+          className='border border-slate-200 dark:border-slate-600'
+        />
+      ) : (
+        <div
+          className='bg-slate-100 dark:bg-slate-600 border border-slate-200 dark:border-slate-500 flex items-center justify-center'
+          style={imageStyles}
+        >
+          <span className='text-2xl'>🖼️</span>
+        </div>
+      )}
     </div>
   );
 };
 
-export default TextComponent;
+export default ImageComponent;

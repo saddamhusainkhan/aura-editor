@@ -1,14 +1,17 @@
 import React from 'react';
 
-interface TextComponentProps {
+interface ButtonComponentProps {
   id: string;
   position: { x: number; y: number };
   customProps: {
     text?: string;
-    color: string;
-    opacity: number;
+    url?: string;
     fontSize?: number;
-    fontWeight?: string;
+    padding?: number;
+    backgroundColor?: string;
+    textColor?: string;
+    borderRadius?: number;
+    opacity: number;
   };
   isSelected: boolean;
   isDragging: boolean;
@@ -16,7 +19,7 @@ interface TextComponentProps {
   onMouseDown: (e: React.MouseEvent, componentId: string) => void;
 }
 
-const TextComponent: React.FC<TextComponentProps> = ({
+const ButtonComponent: React.FC<ButtonComponentProps> = ({
   id,
   position,
   customProps,
@@ -45,11 +48,25 @@ const TextComponent: React.FC<TextComponentProps> = ({
   const inlineStyles = {
     left: position.x,
     top: position.y,
-    color: customProps.color,
     opacity: customProps.opacity / 100,
-    fontSize: customProps.fontSize || 16,
-    fontWeight: customProps.fontWeight || 'normal',
   };
+
+  const buttonStyles = {
+    fontSize: customProps.fontSize || 14,
+    padding: customProps.padding || 8,
+    backgroundColor: customProps.backgroundColor || '#3b82f6',
+    color: customProps.textColor || '#ffffff',
+    borderRadius: customProps.borderRadius || 6,
+  };
+
+  const buttonContent = (
+    <button
+      className='px-4 py-2 rounded text-sm font-medium transition-colors hover:opacity-80'
+      style={buttonStyles}
+    >
+      {customProps.text || 'Button'}
+    </button>
+  );
 
   return (
     <div
@@ -58,11 +75,15 @@ const TextComponent: React.FC<TextComponentProps> = ({
       onMouseDown={handleMouseDown}
       onClick={handleClick}
     >
-      <span className='text-sm font-medium'>
-        {customProps.text || 'Default Text'}
-      </span>
+      {customProps.url ? (
+        <a href={customProps.url} target='_blank' rel='noopener noreferrer'>
+          {buttonContent}
+        </a>
+      ) : (
+        buttonContent
+      )}
     </div>
   );
 };
 
-export default TextComponent;
+export default ButtonComponent;
