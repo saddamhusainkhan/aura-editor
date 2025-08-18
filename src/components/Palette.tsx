@@ -4,9 +4,11 @@ import {
   FileText,
   Image,
   Square,
-  Container,
-  Rows,
-  Columns,
+  // Container,
+  // Rows,
+  // Columns,
+  // Layout,
+  // Layers,
 } from 'lucide-react';
 
 interface PaletteProps {
@@ -50,24 +52,36 @@ const Palette: React.FC<PaletteProps> = ({ onComponentSelect }) => {
       icon: Square,
       color: 'text-orange-600 dark:text-orange-400',
     },
-    {
-      type: 'container',
-      name: 'Container',
-      icon: Container,
-      color: 'text-indigo-600 dark:text-indigo-400',
-    },
-    {
-      type: 'row',
-      name: 'Row',
-      icon: Rows,
-      color: 'text-cyan-600 dark:text-cyan-400',
-    },
-    {
-      type: 'column',
-      name: 'Column',
-      icon: Columns,
-      color: 'text-pink-600 dark:text-pink-400',
-    },
+    // {
+    //   type: 'container',
+    //   name: 'Container',
+    //   icon: Container,
+    //   color: 'text-indigo-600 dark:text-indigo-400',
+    // },
+    // {
+    //   type: 'row',
+    //   name: 'Row',
+    //   icon: Rows,
+    //   color: 'text-cyan-600 dark:text-cyan-400',
+    // },
+    // {
+    //   type: 'column',
+    //   name: 'Column',
+    //   icon: Columns,
+    //   color: 'text-pink-600 dark:text-pink-400',
+    // },
+    // {
+    //   type: 'layout',
+    //   name: 'Layout',
+    //   icon: Layout,
+    //   color: 'text-emerald-600 dark:text-emerald-400',
+    // },
+    // {
+    //   type: 'section',
+    //   name: 'Section',
+    //   icon: Layers,
+    //   color: 'text-amber-600 dark:text-amber-400',
+    // },
   ];
 
   return (
@@ -105,7 +119,11 @@ const Palette: React.FC<PaletteProps> = ({ onComponentSelect }) => {
                       ? 'bg-indigo-50 dark:bg-indigo-900/20 border-indigo-200 dark:border-indigo-700 hover:bg-indigo-100 dark:hover:bg-indigo-900/30'
                       : component.type === 'row'
                       ? 'bg-cyan-50 dark:bg-cyan-900/20 border-cyan-200 dark:border-cyan-700 hover:bg-cyan-100 dark:hover:bg-cyan-900/30'
-                      : 'bg-pink-50 dark:bg-pink-900/20 border-pink-200 dark:border-pink-700 hover:bg-pink-100 dark:hover:bg-pink-900/30'
+                      : component.type === 'column'
+                      ? 'bg-pink-50 dark:bg-pink-900/20 border-pink-200 dark:border-pink-700 hover:bg-pink-100 dark:hover:bg-pink-900/30'
+                      : component.type === 'layout'
+                      ? 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-700 hover:bg-emerald-100 dark:hover:bg-emerald-900/30'
+                      : 'bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-700 hover:bg-amber-100 dark:hover:bg-amber-900/30'
                   }`}
                 >
                   {React.createElement(component.icon, {

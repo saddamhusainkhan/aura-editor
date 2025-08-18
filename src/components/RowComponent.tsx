@@ -136,4 +136,4 @@ const RowComponent: React.FC<RowComponentProps> = ({
   );
 };
 
-export default RowComponent; 
+export default RowComponent;

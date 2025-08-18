@@ -38,6 +38,7 @@ export interface CanvasComponent {
     alignItems?: string;
     borderColor?: string;
     borderWidth?: number;
+    title?: string;
     [key: string]: string | number | undefined;
   };
 }

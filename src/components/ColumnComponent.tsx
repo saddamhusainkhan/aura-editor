@@ -38,7 +38,6 @@ const ColumnComponent: React.FC<ColumnComponentProps> = ({
   onMouseDown,
   onDelete,
   zIndex,
-  children,
 }) => {
   const handleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -89,8 +88,8 @@ const ColumnComponent: React.FC<ColumnComponentProps> = ({
     display: 'flex',
     flexDirection: 'column' as const,
     gap: `${inlineStyles.gap}px`,
-    justifyContent: inlineStyles.justifyContent as any,
-    alignItems: inlineStyles.alignItems as any,
+    justifyContent: inlineStyles.justifyContent as string,
+    alignItems: inlineStyles.alignItems as string,
     overflow: 'hidden',
   };
 
@@ -147,4 +146,4 @@ const ColumnComponent: React.FC<ColumnComponentProps> = ({
   );
 };
 
-export default ColumnComponent; 
+export default ColumnComponent;

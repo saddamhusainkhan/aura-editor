@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { Bold, Italic, Underline, X } from 'lucide-react';
 
 interface TextAreaComponentProps {
@@ -9,14 +9,10 @@ interface TextAreaComponentProps {
     color: string;
     opacity: number;
     fontSize?: number;
-    textAlign?: string;
     fontWeight?: string;
     fontStyle?: string;
     textDecoration?: string;
-    paddingTop?: number;
-    paddingRight?: number;
-    paddingBottom?: number;
-    paddingLeft?: number;
+    textAlign?: string;
     [key: string]: string | number | undefined;
   };
   isSelected: boolean;
@@ -58,6 +54,12 @@ const TextAreaComponent: React.FC<TextAreaComponentProps> = ({
 
   // Update edit text and styles when customProps change
   useEffect(() => {
+    console.log('TextAreaComponent: customProps changed', {
+      fontWeight: customProps.fontWeight,
+      fontStyle: customProps.fontStyle,
+      textDecoration: customProps.textDecoration,
+    });
+
     setEditText(customProps.text || '');
     setCurrentStyles({
       fontWeight: (customProps.fontWeight as string) || 'normal',
@@ -69,6 +71,20 @@ const TextAreaComponent: React.FC<TextAreaComponentProps> = ({
     customProps.fontWeight,
     customProps.fontStyle,
     customProps.textDecoration,
+  ]);
+
+  // Apply styles to DOM element when currentStyles change
+  useEffect(() => {
+    if (textareaRef.current) {
+      const element = textareaRef.current;
+      element.style.fontWeight = currentStyles.fontWeight;
+      element.style.fontStyle = currentStyles.fontStyle;
+      element.style.textDecoration = currentStyles.textDecoration;
+    }
+  }, [
+    currentStyles.fontWeight,
+    currentStyles.fontStyle,
+    currentStyles.textDecoration,
   ]);
 
   const handleClick = (e: React.MouseEvent) => {
@@ -119,6 +135,15 @@ const TextAreaComponent: React.FC<TextAreaComponentProps> = ({
   };
 
   const handleFormatClick = (format: string) => {
+    console.log(
+      'TextAreaComponent: handleFormatClick called with format:',
+      format
+    );
+    console.log(
+      'TextAreaComponent: current styles before update:',
+      currentStyles
+    );
+
     let newStyles = { ...currentStyles };
 
     switch (format) {
@@ -136,10 +161,20 @@ const TextAreaComponent: React.FC<TextAreaComponentProps> = ({
         break;
     }
 
+    console.log('TextAreaComponent: new styles after update:', newStyles);
     setCurrentStyles(newStyles);
+
+    // Apply styles immediately to DOM for instant visual feedback
+    if (textareaRef.current) {
+      const element = textareaRef.current;
+      element.style.fontWeight = newStyles.fontWeight;
+      element.style.fontStyle = newStyles.fontStyle;
+      element.style.textDecoration = newStyles.textDecoration;
+    }
 
     // Save styles to component properties
     if (onStyleChange) {
+      console.log('TextAreaComponent: calling onStyleChange with:', newStyles);
       onStyleChange(id, newStyles);
     }
   };
@@ -157,23 +192,22 @@ const TextAreaComponent: React.FC<TextAreaComponentProps> = ({
     top: position.y,
     opacity: customProps.opacity / 100,
     zIndex: zIndex,
+    width: `calc(100% - ${position.x}px)`,
+    maxWidth: '100%',
   };
 
-  const textareaStyles: React.CSSProperties = {
-    color: customProps.color,
+  const textareaStyles = {
     fontSize: customProps.fontSize || 14,
-    fontWeight: currentStyles.fontWeight,
-    fontStyle: currentStyles.fontStyle,
-    textDecoration: currentStyles.textDecoration,
+    fontWeight: customProps.fontWeight || 'normal',
+    color: customProps.color || '#000000',
     textAlign: (customProps.textAlign as 'left' | 'center' | 'right') || 'left',
+    width: '100%',
     minHeight: '60px',
-    minWidth: '120px',
-    resize: 'both' as const,
-    overflow: 'auto',
-    paddingTop: customProps.paddingTop || 8,
-    paddingRight: customProps.paddingRight || 12,
-    paddingBottom: customProps.paddingBottom || 8,
-    paddingLeft: customProps.paddingLeft || 12,
+    resize: 'none' as const,
+    border: 'none',
+    outline: 'none',
+    background: 'transparent',
+    fontFamily: 'inherit',
   };
 
   return (

@@ -57,6 +57,7 @@ const PreviewModal: React.FC<PreviewModalProps> = ({
         left: ${component.position.x}px;
         top: ${component.position.y}px;
         opacity: ${component.props.opacity / 100};
+        width: 100%;
       `;
 
       switch (component.type) {
@@ -74,7 +75,7 @@ const PreviewModal: React.FC<PreviewModalProps> = ({
           </div>`;
 
         case 'textarea':
-          return `<textarea style="${baseStyles} font-size: ${
+          return `<div style="${baseStyles} font-size: ${
             component.props.fontSize || 14
           }px; font-weight: ${
             component.props.fontWeight || 'normal'
@@ -84,30 +85,34 @@ const PreviewModal: React.FC<PreviewModalProps> = ({
             component.props.textDecoration || 'none'
           }; color: ${component.props.color}; text-align: ${
             component.props.textAlign || 'left'
-          }; border: 1px solid #ccc; padding: 8px; resize: none; background: white;" readonly>
-            ${component.props.text || ''}
-          </textarea>`;
+          }; width: calc(100% - ${component.position.x}px); max-width: 100%;">
+              <textarea style="width: 100%; min-height: 60px; border: none; outline: none; background: transparent; font-family: inherit; font-size: inherit; font-weight: inherit; color: inherit; text-align: inherit; resize: none; padding: 0;">
+                ${component.props.text || 'Default TextArea Content'}
+              </textarea>
+            </div>`;
 
         case 'image':
-          if (component.props.src) {
-            return `<img src="${component.props.src}" alt="${
-              component.props.alt || 'Image'
-            }" style="${baseStyles} width: ${
-              component.props.width || 120
-            }px; height: ${component.props.height || 120}px; border-radius: ${
-              component.props.borderRadius || 0
-            }px; object-fit: ${
-              component.props.objectFit || 'cover'
-            }; border: 1px solid #ccc;" />`;
-          } else {
-            return `<div style="${baseStyles} width: ${
-              component.props.width || 120
-            }px; height: ${component.props.height || 120}px; border-radius: ${
-              component.props.borderRadius || 0
-            }px; background: #f1f5f9; border: 1px solid #cbd5e1; display: flex; align-items: center; justify-content: center; font-size: 24px; color: #64748b;">
-              IMG
-            </div>`;
-          }
+          const imageJustifyContent =
+            component.props.textAlign === 'center'
+              ? 'center'
+              : component.props.textAlign === 'right'
+              ? 'flex-end'
+              : 'flex-start';
+
+          return `<div style="${baseStyles} display: flex; justify-content: ${imageJustifyContent};">
+            <img src="${
+              component.props.src ||
+              'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjEyMCIgdmlld0JveD0iMCAwIDEyMCAxMjAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxMjAiIGhlaWdodD0iMTIwIiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik00MCA0MEg4MFY4MEg0MFY0MFoiIGZpbGw9IiM5Q0EzQUYiLz4KPC9zdmc+'
+            }" alt="${component.props.alt || 'Image'}" style="width: ${
+            component.props.width ? `${component.props.width}%` : '100%'
+          }; height: ${component.props.height || 120}px; object-fit: ${
+            component.props.objectFit || 'cover'
+          }; border-radius: ${component.props.borderRadiusTop || 0}px ${
+            component.props.borderRadiusRight || 0
+          }px ${component.props.borderRadiusBottom || 0}px ${
+            component.props.borderRadiusLeft || 0
+          }px;" />
+          </div>`;
 
         case 'container':
           return `<div style="${baseStyles} width: ${
@@ -173,6 +178,41 @@ const PreviewModal: React.FC<PreviewModalProps> = ({
               Column ({gridSpan}/12 = {gridWidth.toFixed(1)}%)
             </div>
           </div>`;
+
+        case 'layout':
+          return `<div style="${baseStyles} width: ${
+            component.props.width || 800
+          }px; height: ${component.props.height || 600}px; padding: ${
+            component.props.padding || 20
+          }px; background-color: ${
+            component.props.backgroundColor || '#ffffff'
+          }; border: ${component.props.borderWidth || 1}px solid ${
+            component.props.borderColor || '#e2e8f0'
+          }; border-radius: ${
+            component.props.borderRadius || 8
+          }px; position: relative; display: flex; flex-direction: column; gap: 16px; overflow: hidden;">
+            <div style="display: flex; align-items: center; justify-content: center; height: 100%; color: #64748b; font-size: 14px;">
+              Website Layout
+            </div>
+          </div>`;
+
+        case 'section':
+          return `<section style="${baseStyles} min-height: ${
+            component.props.height || 120
+          }px; padding: ${component.props.padding || 20}px; background-color: ${
+            component.props.backgroundColor || '#f8fafc'
+          }; border: ${component.props.borderWidth || 1}px solid ${
+            component.props.borderColor || '#e2e8f0'
+          }; border-radius: ${
+            component.props.borderRadius || 6
+          }px; position: relative;">
+            <h2 style="margin: 0 0 16px 0; font-size: 18px; font-weight: 600; color: #374151;">
+              {component.props.title || 'Section'}
+            </h2>
+            <div style="min-height: 60px; background: white; border: 1px dashed #cbd5e1; border-radius: 4px; display: flex; align-items: center; justify-content: center; color: #64748b; font-size: 14px;">
+              Section Content
+            </div>
+          </section>`;
 
         case 'button':
           const buttonStyles = `

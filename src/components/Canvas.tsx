@@ -7,6 +7,8 @@ import ButtonComponent from './ButtonComponent';
 import ContainerComponent from './ContainerComponent';
 import RowComponent from './RowComponent';
 import ColumnComponent from './ColumnComponent';
+import LayoutComponent from './LayoutComponent';
+import SectionComponent from './SectionComponent';
 
 interface CanvasComponent {
   id: string;
@@ -236,7 +238,7 @@ const Canvas: React.FC<CanvasProps> = ({
         case 'text':
           return (
             <TextComponent
-              key={component.id}
+              key={`${component.id}-${component.props.fontWeight}-${component.props.fontStyle}-${component.props.textDecoration}`}
               id={component.id}
               position={component.position}
               customProps={component.props}
@@ -262,7 +264,7 @@ const Canvas: React.FC<CanvasProps> = ({
         case 'textarea':
           return (
             <TextAreaComponent
-              key={component.id}
+              key={`${component.id}-${component.props.fontWeight}-${component.props.fontStyle}-${component.props.textDecoration}`}
               id={component.id}
               position={component.position}
               customProps={component.props}
@@ -360,6 +362,35 @@ const Canvas: React.FC<CanvasProps> = ({
             />
           );
 
+        case 'layout':
+          return (
+            <LayoutComponent
+              key={component.id}
+              id={component.id}
+              position={component.position}
+              customProps={component.props}
+              isSelected={isSelected}
+              isDragging={isDragging && isSelected}
+              onSelect={handleComponentSelect}
+              onMouseDown={handleComponentMouseDown}
+              zIndex={component.zIndex}
+            />
+          );
+
+        case 'section':
+          return (
+            <SectionComponent
+              key={component.id}
+              id={component.id}
+              index={0} // This will be handled by the layout component
+              customProps={component.props}
+              isSelected={isSelected}
+              isDragging={isDragging && isSelected}
+              onSelect={handleComponentSelect}
+              onMouseDown={handleComponentMouseDown}
+            />
+          );
+
         default:
           return (
             <div
@@ -413,7 +444,7 @@ const Canvas: React.FC<CanvasProps> = ({
       <div className='absolute inset-0 p-4'>
         <div
           ref={canvasRef}
-          className='w-full h-full bg-white dark:bg-slate-800 rounded-lg border-2 border-dashed border-slate-300 dark:border-slate-600 relative overflow-hidden'
+          className='w-full h-full overflow-y-auto  bg-white dark:bg-slate-800 rounded-lg border-2 border-dashed border-slate-300 dark:border-slate-600 relative overflow-hidden'
           onDragOver={handleDragOver}
           onDrop={handleDrop}
           onClick={() => {

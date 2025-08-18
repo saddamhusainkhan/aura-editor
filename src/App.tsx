@@ -210,7 +210,12 @@ function App() {
             : componentType === 'button'
             ? 14
             : undefined,
-        fontWeight: componentType === 'text' ? 'normal' : undefined,
+        fontWeight:
+          componentType === 'text'
+            ? 'normal'
+            : componentType === 'textarea'
+            ? 'normal'
+            : undefined,
         fontStyle:
           componentType === 'text' || componentType === 'textarea'
             ? 'normal'
@@ -219,18 +224,29 @@ function App() {
           componentType === 'text' || componentType === 'textarea'
             ? 'none'
             : undefined,
-        textAlign: componentType === 'textarea' ? 'left' : undefined,
+        textAlign:
+          componentType === 'textarea'
+            ? 'left'
+            : componentType === 'image'
+            ? 'left'
+            : undefined,
         src: componentType === 'image' ? undefined : undefined,
         alt: componentType === 'image' ? 'Image' : undefined,
         width:
           componentType === 'image'
-            ? 120
+            ? 100
             : componentType === 'container'
             ? 400
             : componentType === 'row'
             ? 600
             : componentType === 'column'
             ? 200
+            : componentType === 'layout'
+            ? 800
+            : componentType === 'text'
+            ? 300
+            : componentType === 'textarea'
+            ? 400
             : undefined,
         height:
           componentType === 'image'
@@ -241,6 +257,10 @@ function App() {
             ? 100
             : componentType === 'column'
             ? 150
+            : componentType === 'layout'
+            ? 600
+            : componentType === 'section'
+            ? 120
             : undefined,
         objectFit: componentType === 'image' ? 'cover' : undefined,
         borderRadius:
@@ -254,6 +274,10 @@ function App() {
             ? 6
             : componentType === 'column'
             ? 6
+            : componentType === 'layout'
+            ? 8
+            : componentType === 'section'
+            ? 6
             : undefined,
         borderRadiusTop:
           componentType === 'button'
@@ -263,6 +287,10 @@ function App() {
             : componentType === 'row'
             ? 6
             : componentType === 'column'
+            ? 6
+            : componentType === 'layout'
+            ? 8
+            : componentType === 'section'
             ? 6
             : 0,
         borderRadiusRight:
@@ -274,6 +302,10 @@ function App() {
             ? 6
             : componentType === 'column'
             ? 6
+            : componentType === 'layout'
+            ? 8
+            : componentType === 'section'
+            ? 6
             : 0,
         borderRadiusBottom:
           componentType === 'button'
@@ -284,6 +316,10 @@ function App() {
             ? 6
             : componentType === 'column'
             ? 6
+            : componentType === 'layout'
+            ? 8
+            : componentType === 'section'
+            ? 6
             : 0,
         borderRadiusLeft:
           componentType === 'button'
@@ -293,6 +329,10 @@ function App() {
             : componentType === 'row'
             ? 6
             : componentType === 'column'
+            ? 6
+            : componentType === 'layout'
+            ? 8
+            : componentType === 'section'
             ? 6
             : 0,
         url: componentType === 'button' ? undefined : undefined,
@@ -305,6 +345,10 @@ function App() {
             ? 16
             : componentType === 'column'
             ? 16
+            : componentType === 'layout'
+            ? 20
+            : componentType === 'section'
+            ? 20
             : undefined,
         paddingTop:
           componentType === 'button'
@@ -363,6 +407,10 @@ function App() {
             ? '#f0f9ff'
             : componentType === 'column'
             ? '#fdf2f8'
+            : componentType === 'layout'
+            ? '#ffffff'
+            : componentType === 'section'
+            ? '#f8fafc'
             : undefined,
         textColor: componentType === 'button' ? '#ffffff' : undefined,
         // Layout-specific properties
@@ -393,6 +441,10 @@ function App() {
             ? '#0ea5e9'
             : componentType === 'column'
             ? '#ec4899'
+            : componentType === 'layout'
+            ? '#e2e8f0'
+            : componentType === 'section'
+            ? '#e2e8f0'
             : undefined,
         borderWidth:
           componentType === 'container'
@@ -400,6 +452,10 @@ function App() {
             : componentType === 'row'
             ? 1
             : componentType === 'column'
+            ? 1
+            : componentType === 'layout'
+            ? 1
+            : componentType === 'section'
             ? 1
             : undefined,
       },
@@ -443,6 +499,11 @@ function App() {
     componentId: string,
     updates: Partial<CanvasComponent['props']>
   ) => {
+    console.log('App: handleComponentUpdate called with:', {
+      componentId,
+      updates,
+    });
+
     updateCanvasWithHistory(
       canvasComponents.map((comp) =>
         comp.id === componentId

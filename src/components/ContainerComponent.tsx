@@ -128,4 +128,4 @@ const ContainerComponent: React.FC<ContainerComponentProps> = ({
   );
 };
 
-export default ContainerComponent; 
+export default ContainerComponent;

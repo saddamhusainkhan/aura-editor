@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { Bold, Italic, Underline, X } from 'lucide-react';
 
 interface TextComponentProps {
@@ -49,14 +49,20 @@ const TextComponent: React.FC<TextComponentProps> = ({
   const [showToolbar, setShowToolbar] = useState(false);
   const [currentStyles, setCurrentStyles] = useState({
     fontWeight: customProps.fontWeight || 'normal',
-    fontStyle: 'normal',
-    textDecoration: 'none',
+    fontStyle: customProps.fontStyle || 'normal',
+    textDecoration: customProps.textDecoration || 'none',
   });
   const textRef = useRef<HTMLDivElement>(null);
   const toolbarRef = useRef<HTMLDivElement>(null);
 
   // Update edit text and styles when customProps change
   useEffect(() => {
+    console.log('TextComponent: customProps changed', {
+      fontWeight: customProps.fontWeight,
+      fontStyle: customProps.fontStyle,
+      textDecoration: customProps.textDecoration,
+    });
+
     setEditText(customProps.text || 'Default Text');
     setCurrentStyles({
       fontWeight: (customProps.fontWeight as string) || 'normal',
@@ -68,6 +74,20 @@ const TextComponent: React.FC<TextComponentProps> = ({
     customProps.fontWeight,
     customProps.fontStyle,
     customProps.textDecoration,
+  ]);
+
+  // Apply styles to DOM element when currentStyles change
+  useEffect(() => {
+    if (textRef.current) {
+      const element = textRef.current;
+      element.style.fontWeight = currentStyles.fontWeight;
+      element.style.fontStyle = currentStyles.fontStyle;
+      element.style.textDecoration = currentStyles.textDecoration;
+    }
+  }, [
+    currentStyles.fontWeight,
+    currentStyles.fontStyle,
+    currentStyles.textDecoration,
   ]);
 
   const handleClick = (e: React.MouseEvent) => {
@@ -121,6 +141,9 @@ const TextComponent: React.FC<TextComponentProps> = ({
   };
 
   const handleFormatClick = (format: string) => {
+    console.log('TextComponent: handleFormatClick called with format:', format);
+    console.log('TextComponent: current styles before update:', currentStyles);
+
     let newStyles = { ...currentStyles };
 
     switch (format) {
@@ -138,10 +161,20 @@ const TextComponent: React.FC<TextComponentProps> = ({
         break;
     }
 
+    console.log('TextComponent: new styles after update:', newStyles);
     setCurrentStyles(newStyles);
+
+    // Apply styles immediately to DOM for instant visual feedback
+    if (textRef.current) {
+      const element = textRef.current;
+      element.style.fontWeight = newStyles.fontWeight;
+      element.style.fontStyle = newStyles.fontStyle;
+      element.style.textDecoration = newStyles.textDecoration;
+    }
 
     // Save styles to component properties
     if (onStyleChange) {
+      console.log('TextComponent: calling onStyleChange with:', newStyles);
       onStyleChange(id, newStyles);
     }
   };
@@ -159,19 +192,39 @@ const TextComponent: React.FC<TextComponentProps> = ({
     top: position.y,
     opacity: customProps.opacity / 100,
     zIndex: zIndex,
+    width: `calc(100% - ${position.x}px)`,
+    maxWidth: '100%',
   };
 
-  const textStyles = {
-    color: customProps.color,
-    fontSize: customProps.fontSize || 16,
-    fontWeight: currentStyles.fontWeight,
-    fontStyle: currentStyles.fontStyle,
-    textDecoration: currentStyles.textDecoration,
-    paddingTop: customProps.paddingTop || 8,
-    paddingRight: customProps.paddingRight || 12,
-    paddingBottom: customProps.paddingBottom || 8,
-    paddingLeft: customProps.paddingLeft || 12,
-  };
+  const textStyles = useMemo(() => {
+    console.log('TextComponent: textStyles useMemo recalculating with:', {
+      fontWeight: currentStyles.fontWeight,
+      fontStyle: currentStyles.fontStyle,
+      textDecoration: currentStyles.textDecoration,
+    });
+
+    return {
+      color: customProps.color,
+      fontSize: customProps.fontSize || 16,
+      fontWeight: currentStyles.fontWeight,
+      fontStyle: currentStyles.fontStyle,
+      textDecoration: currentStyles.textDecoration,
+      paddingTop: customProps.paddingTop || 8,
+      paddingRight: customProps.paddingRight || 12,
+      paddingBottom: customProps.paddingBottom || 8,
+      paddingLeft: customProps.paddingLeft || 12,
+    };
+  }, [
+    customProps.color,
+    customProps.fontSize,
+    customProps.paddingTop,
+    customProps.paddingRight,
+    customProps.paddingBottom,
+    customProps.paddingLeft,
+    currentStyles.fontWeight,
+    currentStyles.fontStyle,
+    currentStyles.textDecoration,
+  ]);
 
   return (
     <>

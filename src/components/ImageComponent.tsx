@@ -15,6 +15,7 @@ interface ImageComponentProps {
     borderRadiusLeft?: number;
     height?: number;
     width?: number;
+    textAlign?: 'left' | 'center' | 'right';
     [key: string]: string | number | undefined;
   };
   isSelected: boolean;
@@ -56,10 +57,20 @@ const ImageComponent: React.FC<ImageComponentProps> = ({
     top: position.y,
     opacity: customProps.opacity / 100,
     zIndex: zIndex,
+    width: `calc(100% - ${position.x}px)`,
+    maxWidth: '100%',
+    display: 'flex',
+    justifyContent:
+      customProps.textAlign === 'center'
+        ? 'center'
+        : customProps.textAlign === 'right'
+        ? 'flex-end'
+        : 'flex-start',
   };
 
   const imageStyles = {
-    width: customProps.width || 120,
+    width: customProps.width ? `${customProps.width}%` : '100%',
+    maxWidth: `calc(100% - ${position.x}px)`,
     height: customProps.height || 120,
     borderRadius: `${customProps.borderRadiusTop || 0}px ${
       customProps.borderRadiusRight || 0
@@ -78,7 +89,9 @@ const ImageComponent: React.FC<ImageComponentProps> = ({
   return (
     <div
       className={`${baseClasses} ${cursorClass} px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded shadow-sm`}
-      style={inlineStyles}
+      style={{
+        ...inlineStyles,
+      }}
       onMouseDown={handleMouseDown}
       onClick={handleClick}
     >

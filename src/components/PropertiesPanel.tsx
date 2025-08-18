@@ -20,6 +20,7 @@ import {
   Container,
   Rows,
   Columns,
+  Layout,
 } from 'lucide-react';
 
 interface CanvasComponent {
@@ -59,6 +60,7 @@ interface CanvasComponent {
     justifyContent?: string;
     alignItems?: string;
     gridSpan?: number;
+    title?: string;
     [key: string]: string | number | undefined;
   };
 }
@@ -240,15 +242,15 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
   const fontWeights = [
     { value: 'normal', label: 'Normal' },
     { value: 'bold', label: 'Bold' },
-    { value: '100', label: 'Thin (100)' },
-    { value: '200', label: 'Extra Light (200)' },
-    { value: '300', label: 'Light (300)' },
-    { value: '400', label: 'Regular (400)' },
-    { value: '500', label: 'Medium (500)' },
-    { value: '600', label: 'Semi Bold (600)' },
-    { value: '700', label: 'Bold (700)' },
-    { value: '800', label: 'Extra Bold (800)' },
-    { value: '900', label: 'Black (900)' },
+    { value: '100', label: 'Thin' },
+    { value: '200', label: 'Extra Light' },
+    { value: '300', label: 'Light' },
+    { value: '400', label: 'Regular' },
+    { value: '500', label: 'Medium' },
+    { value: '600', label: 'Semi Bold' },
+    { value: '700', label: 'Bold' },
+    { value: '800', label: 'Extra Bold' },
+    { value: '900', label: 'Black' },
   ];
 
   if (!selectedComponent) {
@@ -509,9 +511,6 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                       <Label className='text-sm font-medium text-slate-700 dark:text-slate-300'>
                         Individual Sides
                       </Label>
-                      <span className='text-xs text-slate-500 dark:text-slate-400'>
-                        Click to toggle
-                      </span>
                     </div>
                     {expandedSections['padding'] ? (
                       <ChevronDown className='h-4 w-4 text-slate-500 dark:text-slate-400' />
@@ -691,9 +690,6 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                           <Label className='text-sm font-medium text-slate-700 dark:text-slate-300'>
                             Individual Sides
                           </Label>
-                          <span className='text-xs text-slate-500 dark:text-slate-400'>
-                            Click to toggle
-                          </span>
                         </div>
                         {expandedSections['borderradius'] ? (
                           <ChevronDown className='h-4 w-4 text-slate-500 dark:text-slate-400' />
@@ -838,40 +834,84 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                 </CardTitle>
               </CardHeader>
               <CardContent className='space-y-3'>
-                <div className='space-y-2'>
-                  <div className='flex justify-between text-xs'>
-                    <span>
-                      Font Size: {selectedComponent.props.fontSize || 14}px
-                    </span>
-                  </div>
-                  <Slider
-                    min={8}
-                    max={24}
-                    value={selectedComponent.props.fontSize || 14}
-                    onChange={handleFontSizeChange}
-                    trackStyle={{ backgroundColor: '#3b82f6', height: 4 }}
-                    handleStyle={{
-                      borderColor: '#3b82f6',
-                      height: 16,
-                      width: 16,
-                      marginTop: -6,
-                    }}
-                    railStyle={{ backgroundColor: '#e2e8f0', height: 4 }}
-                  />
-                </div>
-                <div className='space-y-2'>
-                  <Label htmlFor='textarea-font-size-input' className='text-xs'>
-                    Font Size (px)
+                {/* TextArea Typography */}
+                <div className='space-y-3'>
+                  <Label className='text-sm font-medium text-slate-700 dark:text-slate-300'>
+                    Typography
                   </Label>
-                  <Input
-                    id='textarea-font-size-input'
-                    type='number'
-                    min={8}
-                    max={24}
-                    value={selectedComponent.props.fontSize || 14}
-                    onChange={handleFontSizeInputChange}
-                    className='font-mono text-sm h-8'
-                  />
+                  <div className='space-y-2'>
+                    <Label className='text-xs'>Font Size (px)</Label>
+                    <div className='flex items-center gap-2'>
+                      <Slider
+                        value={selectedComponent.props.fontSize || 14}
+                        min={8}
+                        max={72}
+                        step={1}
+                        onChange={(sliderValue) => {
+                          const numValue = Array.isArray(sliderValue)
+                            ? sliderValue[0]
+                            : sliderValue;
+                          onComponentUpdate(selectedComponent.id, {
+                            fontSize: numValue,
+                          });
+                        }}
+                        className='flex-1'
+                        trackStyle={{
+                          backgroundColor: '#3b82f6',
+                          height: 6,
+                          borderRadius: 3,
+                        }}
+                        handleStyle={{
+                          borderColor: '#3b82f6',
+                          backgroundColor: '#ffffff',
+                          borderWidth: 3,
+                          width: 20,
+                          height: 20,
+                          marginTop: -7,
+                          boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+                          cursor: 'grab',
+                        }}
+                        railStyle={{
+                          backgroundColor: '#e2e8f0',
+                          height: 6,
+                          borderRadius: 3,
+                        }}
+                      />
+                      <Input
+                        type='number'
+                        value={selectedComponent.props.fontSize || 14}
+                        min={8}
+                        max={72}
+                        step={1}
+                        onChange={(e) =>
+                          onComponentUpdate(selectedComponent.id, {
+                            fontSize: Number(e.target.value),
+                          })
+                        }
+                        className='h-8 w-16 text-sm'
+                      />
+                    </div>
+                  </div>
+                  <div className='space-y-2'>
+                    <Label className='text-xs'>Font Weight</Label>
+                    <div className='grid grid-cols-2 gap-2'>
+                      {fontWeights.map((weight) => (
+                        <Button
+                          key={weight.value}
+                          variant={
+                            selectedComponent.props.fontWeight === weight.value
+                              ? 'default'
+                              : 'outline'
+                          }
+                          size='sm'
+                          className='text-xs h-8'
+                          onClick={() => handleFontWeightChange(weight.value)}
+                        >
+                          {weight.label}
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -977,24 +1017,80 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                 <CardTitle className='text-sm'>Dimensions</CardTitle>
               </CardHeader>
               <CardContent className='space-y-3'>
-                {renderSlider(
-                  'Width',
-                  selectedComponent.props.width || 120,
-                  50,
-                  500,
-                  1,
-                  (value) =>
-                    onComponentUpdate(selectedComponent.id, { width: value })
-                )}
-                {renderSlider(
-                  'Height',
-                  selectedComponent.props.height || 120,
-                  50,
-                  500,
-                  1,
-                  (value) =>
-                    onComponentUpdate(selectedComponent.id, { height: value })
-                )}
+                <div className='space-y-3'>
+                  <Label className='text-sm font-medium text-slate-700 dark:text-slate-300'>
+                    Dimensions
+                  </Label>
+                  <div className='space-y-2'>
+                    <Label className='text-xs'>Width (%)</Label>
+                    <div className='flex items-center gap-2'>
+                      <Slider
+                        value={selectedComponent.props.width || 100}
+                        min={10}
+                        max={100}
+                        step={5}
+                        onChange={(sliderValue) => {
+                          const numValue = Array.isArray(sliderValue)
+                            ? sliderValue[0]
+                            : sliderValue;
+                          onComponentUpdate(selectedComponent.id, {
+                            width: numValue,
+                          });
+                        }}
+                        className='flex-1'
+                        trackStyle={{
+                          backgroundColor: '#3b82f6',
+                          height: 6,
+                          borderRadius: 3,
+                        }}
+                        handleStyle={{
+                          borderColor: '#3b82f6',
+                          backgroundColor: '#ffffff',
+                          borderWidth: 3,
+                          width: 20,
+                          height: 20,
+                          marginTop: -7,
+                          boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+                          cursor: 'grab',
+                        }}
+                        railStyle={{
+                          backgroundColor: '#e2e8f0',
+                          height: 6,
+                          borderRadius: 3,
+                        }}
+                      />
+                      <Input
+                        type='number'
+                        value={selectedComponent.props.width || 100}
+                        min={10}
+                        max={100}
+                        step={5}
+                        onChange={(e) =>
+                          onComponentUpdate(selectedComponent.id, {
+                            width: Number(e.target.value),
+                          })
+                        }
+                        className='h-8 w-16 text-sm'
+                      />
+                    </div>
+                  </div>
+                  <div className='space-y-2'>
+                    <Label className='text-xs'>Height (px)</Label>
+                    <Input
+                      type='number'
+                      value={selectedComponent.props.height || 120}
+                      min={50}
+                      max={800}
+                      step={10}
+                      onChange={(e) =>
+                        onComponentUpdate(selectedComponent.id, {
+                          height: Number(e.target.value),
+                        })
+                      }
+                      className='h-8 text-sm'
+                    />
+                  </div>
+                </div>
               </CardContent>
             </Card>
           )}
@@ -1026,6 +1122,70 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                         </Button>
                       )
                     )}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Image Positioning */}
+          {selectedComponent.type === 'image' && (
+            <Card className='shadow-sm'>
+              <CardHeader className='pb-3'>
+                <CardTitle className='text-sm'>Positioning</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className='space-y-2'>
+                  <Label className='text-xs'>Alignment</Label>
+                  <div className='flex gap-1'>
+                    <Button
+                      variant={
+                        (selectedComponent.props.textAlign || 'left') === 'left'
+                          ? 'default'
+                          : 'outline'
+                      }
+                      size='sm'
+                      onClick={() =>
+                        onComponentUpdate(selectedComponent.id, {
+                          textAlign: 'left',
+                        })
+                      }
+                      className='flex-1 text-xs'
+                    >
+                      Left
+                    </Button>
+                    <Button
+                      variant={
+                        selectedComponent.props.textAlign === 'center'
+                          ? 'default'
+                          : 'outline'
+                      }
+                      size='sm'
+                      onClick={() =>
+                        onComponentUpdate(selectedComponent.id, {
+                          textAlign: 'center',
+                        })
+                      }
+                      className='flex-1 text-xs'
+                    >
+                      Center
+                    </Button>
+                    <Button
+                      variant={
+                        selectedComponent.props.textAlign === 'right'
+                          ? 'default'
+                          : 'outline'
+                      }
+                      size='sm'
+                      onClick={() =>
+                        onComponentUpdate(selectedComponent.id, {
+                          textAlign: 'right',
+                        })
+                      }
+                      className='flex-1 text-xs'
+                    >
+                      Right
+                    </Button>
                   </div>
                 </div>
               </CardContent>
@@ -1636,6 +1796,215 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                       <option value='stretch'>Stretch</option>
                       <option value='baseline'>Baseline</option>
                     </select>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Layout Properties */}
+          {selectedComponent.type === 'layout' && (
+            <Card className='shadow-sm'>
+              <CardHeader className='pb-3'>
+                <CardTitle className='text-sm flex items-center gap-2'>
+                  <Layout className='w-4 h-4' />
+                  Layout Properties
+                </CardTitle>
+              </CardHeader>
+              <CardContent className='space-y-4'>
+                {/* Layout Dimensions */}
+                <div className='space-y-3'>
+                  <Label className='text-sm font-medium text-slate-700 dark:text-slate-300'>
+                    Dimensions
+                  </Label>
+                  <div className='grid grid-cols-2 gap-3'>
+                    <div className='space-y-2'>
+                      <Label className='text-xs'>Width (px)</Label>
+                      <Input
+                        type='number'
+                        value={selectedComponent.props.width || 800}
+                        min={400}
+                        max={2000}
+                        step={50}
+                        onChange={(e) =>
+                          onComponentUpdate(selectedComponent.id, {
+                            width: Number(e.target.value),
+                          })
+                        }
+                        className='h-8 text-sm'
+                      />
+                    </div>
+                    <div className='space-y-2'>
+                      <Label className='text-xs'>Height (px)</Label>
+                      <Input
+                        type='number'
+                        value={selectedComponent.props.height || 600}
+                        min={300}
+                        max={2000}
+                        step={50}
+                        onChange={(e) =>
+                          onComponentUpdate(selectedComponent.id, {
+                            height: Number(e.target.value),
+                          })
+                        }
+                        className='h-8 text-sm'
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Layout Styling */}
+                <div className='space-y-3'>
+                  <Label className='text-sm font-medium text-slate-700 dark:text-slate-300'>
+                    Layout Styling
+                  </Label>
+                  <div className='space-y-2'>
+                    <Label className='text-xs'>Background Color</Label>
+                    <HexColorPicker
+                      color={
+                        selectedComponent.props.backgroundColor || '#ffffff'
+                      }
+                      onChange={(color) =>
+                        onComponentUpdate(selectedComponent.id, {
+                          backgroundColor: color,
+                        })
+                      }
+                      className='w-full h-32'
+                    />
+                  </div>
+                  <div className='space-y-2'>
+                    <Label className='text-xs'>Border Color</Label>
+                    <HexColorPicker
+                      color={selectedComponent.props.borderColor || '#e2e8f0'}
+                      onChange={(color) =>
+                        onComponentUpdate(selectedComponent.id, {
+                          borderColor: color,
+                        })
+                      }
+                      className='w-full h-32'
+                    />
+                  </div>
+                  <div className='space-y-2'>
+                    <Label className='text-xs'>Border Width (px)</Label>
+                    <Input
+                      type='number'
+                      value={selectedComponent.props.borderWidth || 1}
+                      min={0}
+                      max={10}
+                      step={1}
+                      onChange={(e) =>
+                        onComponentUpdate(selectedComponent.id, {
+                          borderWidth: Number(e.target.value),
+                        })
+                      }
+                      className='h-8 text-sm'
+                    />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Section Properties */}
+          {selectedComponent.type === 'section' && (
+            <Card className='shadow-sm'>
+              <CardHeader className='pb-3'>
+                <CardTitle className='text-sm flex items-center gap-2'>
+                  <Layers className='w-4 h-4' />
+                  Section Properties
+                </CardTitle>
+              </CardHeader>
+              <CardContent className='space-y-4'>
+                {/* Section Title */}
+                <div className='space-y-3'>
+                  <Label className='text-sm font-medium text-slate-700 dark:text-slate-300'>
+                    Section Title
+                  </Label>
+                  <div className='space-y-2'>
+                    <Label className='text-xs'>Title</Label>
+                    <Input
+                      type='text'
+                      value={selectedComponent.props.title || `Section ${1}`}
+                      placeholder='Enter section title'
+                      onChange={(e) =>
+                        onComponentUpdate(selectedComponent.id, {
+                          title: e.target.value,
+                        })
+                      }
+                      className='h-8 text-sm'
+                    />
+                  </div>
+                </div>
+
+                {/* Section Dimensions */}
+                <div className='space-y-3'>
+                  <Label className='text-sm font-medium text-slate-700 dark:text-slate-300'>
+                    Dimensions
+                  </Label>
+                  <div className='space-y-2'>
+                    <Label className='text-xs'>Height (px)</Label>
+                    <Input
+                      type='number'
+                      value={selectedComponent.props.height || 120}
+                      min={60}
+                      max={1000}
+                      step={10}
+                      onChange={(e) =>
+                        onComponentUpdate(selectedComponent.id, {
+                          height: Number(e.target.value),
+                        })
+                      }
+                      className='h-8 text-sm'
+                    />
+                  </div>
+                </div>
+
+                {/* Section Styling */}
+                <div className='space-y-3'>
+                  <Label className='text-sm font-medium text-slate-700 dark:text-slate-300'>
+                    Section Styling
+                  </Label>
+                  <div className='space-y-2'>
+                    <Label className='text-xs'>Background Color</Label>
+                    <HexColorPicker
+                      color={
+                        selectedComponent.props.backgroundColor || '#f8fafc'
+                      }
+                      onChange={(color) =>
+                        onComponentUpdate(selectedComponent.id, {
+                          backgroundColor: color,
+                        })
+                      }
+                      className='w-full h-32'
+                    />
+                  </div>
+                  <div className='space-y-2'>
+                    <Label className='text-xs'>Border Color</Label>
+                    <HexColorPicker
+                      color={selectedComponent.props.borderColor || '#e2e8f0'}
+                      onChange={(color) =>
+                        onComponentUpdate(selectedComponent.id, {
+                          borderColor: color,
+                        })
+                      }
+                      className='w-full h-32'
+                    />
+                  </div>
+                  <div className='space-y-2'>
+                    <Label className='text-xs'>Border Width (px)</Label>
+                    <Input
+                      type='number'
+                      value={selectedComponent.props.borderWidth || 1}
+                      min={0}
+                      max={10}
+                      step={1}
+                      onChange={(e) =>
+                        onComponentUpdate(selectedComponent.id, {
+                          borderWidth: Number(e.target.value),
+                        })
+                      }
+                      className='h-8 text-sm'
+                    />
                   </div>
                 </div>
               </CardContent>
